@@ -1,0 +1,374 @@
+window.app_saku2_transaksi_kopeg_bsm_fPolisUpdate = function(owner)
+{
+	if (owner)
+	{
+		window.app_saku2_transaksi_kopeg_bsm_fPolisUpdate.prototype.parent.constructor.call(this,owner);
+		this.className  = "app_saku2_transaksi_kopeg_bsm_fPolisUpdate";
+		this.itemsValue = new arrayList();
+		this.maximize();
+		this.app._mainForm.childFormConfig(this, "mainButtonClick","Form Update No Polis : Input", 0);	
+		
+		uses("saiCB;saiMemo;saiCBBL;saiEdit;datePicker;saiGrid;sgNavigator;pageControl;checkBox");				
+		this.pc1 = new pageControl(this,{bound:[10,18,1000,470], childPage:["Daftar Pengajuan","Data Pengajuan","Cari Data"]});		
+		this.sg = new saiGrid(this.pc1.childPage[0],{bound:[1,5,this.pc1.width-5,this.pc1.height-30],colCount:11,tag:9,		            
+					colTitle:["No Dokumen","Status","Tanggal","Penanggung","Tertanggung","Curr","Sum Insured","Premi","Tgl Mulai","Tgl Selesai","Remark"],
+					colWidth:[[10,9,8,7,6,5,4,3,2,1,0],[200,70,70,100,100,50,200,200,70,70,100]],
+					readOnly:true,colFormat:[[6,7],[cfNilai,cfNilai]],
+					dblClick:[this,"doDoubleClick"],autoAppend:false,defaultRow:1});		
+		this.sgn = new portalui_sgNavigator(this.pc1.childPage[0],{bound:[1,this.pc1.height-25,this.pc1.width-1,25],buttonStyle:3,grid:this.sg,pager:[this,"doPager"]});		
+		
+		this.e_periode = new portalui_saiLabelEdit(this,{bound:[20,11,202,20],caption:"Periode",tag:2,readOnly:true,visible:false});
+		this.l_tgl1 = new portalui_label(this.pc1.childPage[1],{bound:[20,12,100,18],caption:"Tanggal", underline:true});
+		this.dp_d1 = new portalui_datePicker(this.pc1.childPage[1],{bound:[120,12,100,18],selectDate:[this,"doSelectDate"]});
+		this.e_nb = new saiLabelEdit(this.pc1.childPage[1],{bound:[250,12,220,20],caption:"No Bukti", readOnly:true});						
+		this.e_nofisik = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,13,450,20],caption:"No Polis", maxLength:50});	
+		this.e_nopolis = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,11,450,20],caption:"No Dokumen", readOnly:true});	
+		this.e_tgl = new saiLabelEdit(this.pc1.childPage[1],{bound:[520,11,450,20],caption:"Tanggal Aju", readOnly:true});
+		this.e_tipe = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,14,450,20],caption:"Acc Exec", readOnly:true});				
+		this.e_vendor = new saiLabelEdit(this.pc1.childPage[1],{bound:[520,14,450,20],caption:"Penanggung", readOnly:true});		
+		this.e_cust = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,12,450,20],caption:"Tertanggung", readOnly:true});		
+		this.e_pic = new saiLabelEdit(this.pc1.childPage[1],{bound:[520,12,450,20],caption:"Acc Exec", readOnly:true});		
+		this.e_tglmulai = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,17,200,20],caption:"Period of Insurance", readOnly:true});
+		this.e_tglselesai = new saiLabelEdit(this.pc1.childPage[1],{bound:[230,17,100,20],labelWidth:0, caption:"", readOnly:true});						
+		this.e_curr = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,14,200,20],caption:"Currency", readOnly:true});		
+		this.e_nilai = new saiLabelEdit(this.pc1.childPage[1],{bound:[270,14,200,20],caption:"Sum Insured", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});		
+		this.e_ppremi = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,16,200,20],caption:"% Premi", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});		
+		this.e_npremi = new saiLabelEdit(this.pc1.childPage[1],{bound:[270,16,200,20],caption:"Nilai Premi", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});						
+		this.e_pcost = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,17,200,20],caption:"Polis Cost", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});		
+		this.e_diskon = new saiLabelEdit(this.pc1.childPage[1],{bound:[270,17,200,20],caption:"Discount", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});						
+		this.e_mat = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,18,200,20],caption:"Biaya Materai", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});		
+		this.e_total = new saiLabelEdit(this.pc1.childPage[1],{bound:[270,18,200,20],caption:"Total", tag:1, readOnly:true, tipeText:ttNilai, text:"0"});						
+		this.e_occup = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,12,450,20],caption:"Occup. of Risk", readOnly:true});						
+		this.e_lokasi = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,13,450,20],caption:"Loc. of Risk", readOnly:true});		
+		this.e_objek = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,16,450,20],caption:"Object of Risk", readOnly:true});		
+		this.e_file = new saiLabelEdit(this.pc1.childPage[1],{bound:[20,15,450,20],caption:"File Upload", readOnly:true, tag:8});		
+		this.bLihat = new button(this.pc1.childPage[1],{bound:[480,15,80,18],caption:"Lihat File",click:[this,"doLihat"]});			
+		this.e_memo2 = new saiMemo(this.pc1.childPage[1],{bound:[20,13,450,80],caption:"Remark",tag:9});
+		
+		this.c_status2 = new saiCB(this.pc1.childPage[2],{bound:[20,10,202,20],caption:"Status",items:["APPROVE","UPDATE"], readOnly:true,tag:2});
+		this.cb_cust2 = new portalui_saiCBBL(this.pc1.childPage[2],{bound:[20,12,202,20],caption:"Tertanggung",tag:9,multiSelection:false}); 				
+		this.bCari = new button(this.pc1.childPage[2],{bound:[120,10,80,18],caption:"Cari Data",click:[this,"doCari"]});			
+				
+		this.rearrangeChild(10, 23);
+		this.pc1.childPage[1].rearrangeChild(10, 23);	
+		this.pc1.childPage[2].rearrangeChild(10, 23);			
+				
+		setTipeButton(tbAllFalse);
+		this.maximize();		
+		this.setTabChildIndex();				
+		uses("server_report_report;portalui_reportViewer");
+		this.viewer = new portalui_reportViewer(this, {bound:[0,0,this.getWidth(), this.getHeight()],visible:false});
+		this.viewer.hide();
+		this.app._mainForm.initReport(this, this.viewer,"doSelectedPage","doCloseReportClick", "doRowPerPageChange", "doPdfClick","doXlsClick",true);
+		this.report = new server_report_report();
+		this.report.addListener(this);
+		
+		try {
+			this.dbLib = new util_dbLib();
+			this.dbLib.addListener(this);
+			uses("util_standar");
+			this.standarLib = new util_standar();
+			this.e_memo2.setReadOnly(true);						
+			this.stsSimpan = 1;
+			this.doSelectDate(this.dp_d1,this.dp_d1.year,this.dp_d1.month,this.dp_d1.day);			
+			this.cb_cust2.setSQL("select kode_cust, nama from sju_cust where kode_lokasi='"+this.app._lokasi+"'",["kode_cust","nama"],false,["Kode","Nama"],"and","Data Tertanggung",true);
+			
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	}
+};
+window.app_saku2_transaksi_kopeg_bsm_fPolisUpdate.extend(window.childForm);
+window.app_saku2_transaksi_kopeg_bsm_fPolisUpdate.implement({	
+	doLihat: function(sender){
+		try{
+			if (this.e_file.getText() != "" || this.e_file.getText() != "-") window.open("server/media/"+this.e_file.getText());
+		}catch(e){
+			alert(e);
+		}
+	},
+	mainButtonClick: function(sender, desk){
+		if (sender == this.app._mainForm.bClear)
+			system.confirm(this, "clear", "screen akan dibersihkan?","form inputan ini akan dibersihkan");	
+		if (sender == this.app._mainForm.bSimpan)
+			system.confirm(this, "simpan", "Apa data sudah benar?","data diform ini apa sudah benar.");	
+		if (sender == this.app._mainForm.bEdit)
+			system.confirm(this, "ubah", "Apa perubahan data sudah benar?","perubahan data diform ini akan disimpan.");	
+		if (sender == this.app._mainForm.bHapus)
+			system.confirm(this, "hapus", "Yakin data akan dihapus?","data yang sudah disimpan tidak bisa di<i>retrieve</i> lagi.");			
+	},
+	simpan: function(){			
+		try{		
+			if (this.stsSimpan == 1) this.doClick();
+			if (this.standarLib.checkEmptyByTag(this, [0,1,2])){
+				try{														
+					uses("server_util_arrayList");
+					var sql = new server_util_arrayList();																			
+					if (this.stsSimpan == 0) {
+						sql.add("delete from bsm_polis_fisik where no_bukti='"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("update bsm_polis_m set progress='1',no_dok='-' where no_polis='"+this.e_nopolis.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");														
+					}
+					
+					sql.add("insert into bsm_polis_fisik (no_bukti,tanggal,kode_lokasi,periode,nik_user,tgl_input,no_polis,no_dok) values "+
+							"('"+this.e_nb.getText()+"','"+this.dp_d1.getDateString()+"','"+this.app._lokasi+"','"+this.e_periode.getText()+"','"+this.app._userLog+"',getdate(),'"+this.e_nopolis.getText()+"','"+this.e_nofisik.getText()+"')");												
+					sql.add("update bsm_polis_m set progress='2',no_dok='"+this.e_nofisik.getText()+"' where no_polis='"+this.e_nopolis.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");														
+					setTipeButton(tbAllFalse);					
+					this.dbLib.execArraySQL(sql);				
+				}
+				catch(e){
+					system.alert(this, e,"");
+				}
+			}
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	},
+	doModalResult: function(event, modalResult){
+		if (modalResult != mrOk) return false;
+		switch (event){
+			case "clear" :
+				if (modalResult == mrOk)
+					this.standarLib.clearByTag(this, new Array("0","1"),this.e_nb);
+					this.sg.clear(1); 
+					this.doLoad();					
+					this.pc1.setActivePage(this.pc1.childPage[0]);						
+					setTipeButton(tbAllFalse);
+				break;
+			case "simpan" :					
+			case "ubah" :	
+				this.preView = "1";				
+				var data = this.dbLib.getDataProvider("select no_polis from bsm_polis_m where no_dok='"+this.e_nofisik.getText()+"' and no_polis<>'"+this.e_nopolis.getText()+"' and kode_lokasi='"+this.app._lokasi+"'",true);
+				if (typeof data == "object"){
+					var line = data.rs.rows[0];							
+					if (line != undefined){						
+						system.alert(this,"Transaksi tidak valid.","No Polis sudah terpakai untuk dokumen : "+line.no_polis);
+						return false;						
+					}					
+				}
+				this.simpan();
+				break;				
+			case "simpancek" : this.simpan();			
+				break;		
+			case "hapus" :	
+				try {
+					this.preView = "0";				
+					uses("server_util_arrayList");
+					var sql = new server_util_arrayList();
+					sql.add("delete from bsm_polis_fisik where no_bukti='"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+					sql.add("update bsm_polis_m set progress='1',no_dok='-' where no_polis='"+this.e_nopolis.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");																		
+					setTipeButton(tbAllFalse);	
+					this.dbLib.execArraySQL(sql);								
+				}
+				catch(e) {
+					alert(e);
+				}
+				break;				
+		}
+	},
+	doSelectDate: function(sender, y,m,d){
+		if (m < 10) m = "0" + m;			
+		if (parseFloat(this.app._periode.substr(4,2)) <= 12) this.e_periode.setText(y+""+m);
+		else {
+			if (m == "12") this.e_periode.setText(this.app._periode);
+			else this.e_periode.setText(y+""+m);
+		}		
+		this.doLoad();
+	},	
+	doClick:function(sender){
+		if (this.e_nopolis.getText()!="") {									
+			this.e_nb.setText(this.standarLib.noBuktiOtomatis(this.dbLib,"bsm_polis_fisik","no_bukti",this.app._lokasi+"-PF"+this.e_periode.getText().substr(2,4)+".","00000"));
+			this.e_nofisik.setFocus();									
+			setTipeButton(tbSimpan);
+		}
+	},		
+	doDoubleClick: function(sender, col , row) {
+		try{
+			if (this.sg.cells(0,row) != "") {							
+				this.pc1.setActivePage(this.pc1.childPage[1]);														
+				this.e_nopolis.setText(this.sg.cells(0,row));
+				this.e_tgl.setText(this.sg.cells(2,row));
+				this.e_vendor.setText(this.sg.cells(3,row));
+				this.e_cust.setText(this.sg.cells(4,row));				
+				this.e_curr.setText(this.sg.cells(5,row));
+				this.e_nilai.setText(this.sg.cells(6,row));
+				this.e_npremi.setText(this.sg.cells(7,row));
+				this.e_tglmulai.setText(this.sg.cells(8,row));
+				this.e_tglselesai.setText(this.sg.cells(9,row));
+				this.e_memo2.setText(this.sg.cells(10,row));
+				
+				var data = this.dbLib.getDataProvider("select a.occup,a.objek,a.lokasi,b.kode_tipe+' - '+b.nama as tipe,c.kode_pic+' - '+c.nama as pic,a.p_premi,a.p_cost,a.diskon,a.materai,isnull(d.no_gambar,'-') as no_gambar,(a.n_premi+a.p_cost-a.diskon+a.materai) as tot "+
+				           "from bsm_polis_m a inner join sju_tipe b on a.kode_tipe=b.kode_tipe and a.kode_lokasi=b.kode_lokasi "+
+						   "                   inner join sju_pic c on a.kode_pic=c.kode_pic and a.kode_lokasi=c.kode_lokasi"+
+				           "                   left join bsm_polis_dok d on a.no_polis=d.no_polis and a.kode_lokasi=d.kode_lokasi "+
+						   "where a.no_polis='"+this.e_nopolis.getText()+"' and a.kode_lokasi='"+this.app._lokasi+"'",true);
+				if (typeof data == "object"){
+					var line = data.rs.rows[0];							
+					if (line != undefined){												
+						this.e_tipe.setText(line.tipe);
+						this.e_pic.setText(line.pic);
+						this.e_ppremi.setText(floatToNilai(line.p_premi));
+						this.e_pcost.setText(floatToNilai(line.p_cost));
+						this.e_diskon.setText(floatToNilai(line.diskon));
+						this.e_mat.setText(floatToNilai(line.materai));
+						this.e_total.setText(floatToNilai(line.tot));
+						this.e_file.setText(line.no_gambar);
+						this.e_occup.setText(line.occup);
+						this.e_objek.setText(line.objek);
+						this.e_lokasi.setText(line.lokasi);
+					}					
+				}
+				if (this.sg.cells(1,row) == "APPROVE") {
+					setTipeButton(tbSimpan);
+					this.stsSimpan = 1;
+					this.doClick();								
+				}
+				else {
+					setTipeButton(tbUbahHapus);
+					this.stsSimpan = 0;
+					var data = this.dbLib.getDataProvider("select no_bukti,no_dok,tanggal from bsm_polis_fisik where no_polis='"+this.e_nopolis.getText()+"' and kode_lokasi='"+this.app._lokasi+"'",true);
+					if (typeof data == "object"){
+						var line = data.rs.rows[0];							
+						if (line != undefined){						
+							this.e_nb.setText(line.no_bukti);
+							this.e_nofisik.setText(line.no_dok);
+							this.dp_d1.setText(line.tanggal);
+						}					
+					}
+				}
+			}
+		} catch(e) {alert(e);}
+	},		
+	doLoad:function(sender){												
+		var strSQL = "select a.no_polis, "+
+					 "case a.progress when '1' then 'APPROVE' "+					 
+					 "end as status,"+
+					 "convert(varchar,a.tanggal,103) as tanggal,c.kode_vendor+'-'+c.nama as vendor,b.kode_cust+'-'+b.nama as cust,a.kode_curr,a.total,a.n_premi,convert(varchar,a.tgl_mulai,103) as tgl_mulai,convert(varchar,a.tgl_selesai,103) as tgl_selesai,a.catat "+		             
+					 "from bsm_polis_m a "+					 
+		             "inner join sju_cust b on a.kode_cust=b.kode_cust and a.kode_lokasi=b.kode_lokasi "+
+					 "inner join sju_vendor c on a.kode_vendor=c.kode_vendor and a.kode_lokasi=c.kode_lokasi "+
+					 "where a.periode<='"+this.e_periode.getText()+"' and a.progress = '1' and a.kode_lokasi='"+this.app._lokasi+"' ";
+		var data = this.dbLib.getDataProvider(strSQL,true);
+		if (typeof data == "object" && data.rs.rows[0] != undefined){
+			this.dataJU = data;
+			this.sgn.setTotalPage(Math.ceil(data.rs.rows.length/20));
+			this.sgn.rearrange();
+			this.doTampilData(1);
+		} else this.sg.clear(1);			
+	},	
+	doCari:function(sender){						
+		var filter = "";
+		if (this.c_status2.getText() == "APPROVE")    filter = " and a.progress = '1' "; 
+		if (this.c_status2.getText() == "UPDATE") filter = " and a.progress = '2' "; 
+		if (this.cb_cust2.getText()!="") filter = " and a.kode_cust='"+this.cb_cust2.getText()+"' ";		
+		
+		var strSQL = "select a.no_polis, "+
+					 "case a.progress when '1' then 'APPROVE' "+					 
+					 "                when '2' then 'UPDATE' "+					 
+					 "end as status,"+
+					 "convert(varchar,a.tanggal,103) as tanggal,c.kode_vendor+'-'+c.nama as vendor,b.kode_cust+'-'+b.nama as cust,a.kode_curr,a.total,a.n_premi,convert(varchar,a.tgl_mulai,103) as tgl_mulai,convert(varchar,a.tgl_selesai,103) as tgl_selesai,a.catat "+		             
+					 "from bsm_polis_m a "+					 
+		             "inner join sju_cust b on a.kode_cust=b.kode_cust and a.kode_lokasi=b.kode_lokasi "+
+					 "inner join sju_vendor c on a.kode_vendor=c.kode_vendor and a.kode_lokasi=c.kode_lokasi "+
+					 "where a.kode_lokasi='"+this.app._lokasi+"' "+filter;
+		var data = this.dbLib.getDataProvider(strSQL,true);
+		if (typeof data == "object" && data.rs.rows[0] != undefined){
+			this.dataJU = data;
+			this.sgn.setTotalPage(Math.ceil(data.rs.rows.length/20));
+			this.sgn.rearrange();
+			this.doTampilData(1);
+		} else this.sg.clear(1);
+		this.pc1.setActivePage(this.pc1.childPage[0]);		
+	},	
+	doTampilData: function(page) {
+		this.sg.clear();
+		var line;
+		this.page = page;
+		var start = (page - 1) * 20;
+		var finish = (start + 20 > this.dataJU.rs.rows.length? this.dataJU.rs.rows.length:start+20);
+		for (var i=start;i<finish;i++){
+			line = this.dataJU.rs.rows[i];													
+			this.sg.appendData([line.no_polis,line.status.toUpperCase(),line.tanggal,line.vendor,line.cust,line.kode_curr,floatToNilai(line.total),floatToNilai(line.n_premi),line.tgl_mulai,line.tgl_selesai,line.catat]); 
+		}
+		this.sg.setNoUrut(start);
+	},
+	doPager: function(sender, page) {
+		this.doTampilData(page);
+	},	
+	doRequestReady: function(sender, methodName, result){
+		if (sender == this.dbLib){
+			try{   
+				switch(methodName){
+	    			case "execArraySQL" :	    				
+						if (result.toLowerCase().search("error") == -1){							
+							if (this.preView == "1") {								
+								this.nama_report="server_report_saku2_kopeg_sju_rptPrQuo";
+								this.filter = " where a.kode_lokasi='"+this.app._lokasi+"' and a.no_quo='"+this.e_nopolis.getText()+"' ";
+								this.filter2 = "";								
+								this.viewer.prepare();
+								this.viewer.setVisible(true);
+								this.app._mainForm.pButton.setVisible(false);
+								this.app._mainForm.reportNavigator.setVisible(true);
+								this.viewer.setTotalPage(this.report.getTotalPage(this.nama_report,this.filter,1,this.filter2));
+								this.app._mainForm.reportNavigator.setTotalPage(this.viewer.getTotalPage());
+								this.app._mainForm.reportNavigator.rearrange();
+								this.showFilter = undefined;
+								this.viewer.useIframe(this.report.previewWithHeader(this.nama_report,this.filter, 1,  1, this.showFilter, this.app._namalokasi,this.filter2));
+								this.page = 1;
+								this.allBtn = false;			
+								this.pc1.hide();   
+							}
+							else {
+								system.info(this,"Transaksi telah sukses tereksekusi (No Bukti : "+ this.e_nb.getText()+")","");							
+								this.clearLayar();
+							}
+						}
+						else {													
+							if (result.toLowerCase().search("primary key") == -1){
+								alert(error);
+							}
+							else this.simpan();						   						
+						}
+	    			break;					
+	    		}    		
+			}
+			catch(e){
+				systemAPI.alert("step : "+step+"; error = "+e);
+			}
+	    }
+	},
+	doCloseReportClick: function(sender){
+		switch(sender.getName()){
+			case "PreviewBtn" :        
+				window.open(this.report.previewWithHeader(this.nama_report,this.filter,1,1, this.showFilter,this.app._namalokasi,this.filter2));
+			break;
+			case "PrintBtn" :
+				this.viewer.useIframe(this.report.previewWithHeader(this.nama_report,this.filter,1,1, this.showFilter,this.app._namalokasi,this.filter2));
+				try
+				{
+					window.frames[this.viewer.getFullId() +"_iframe"].focus();
+					window.frames[this.viewer.getFullId() +"_iframe"].print();
+				}catch(e)
+				{alert(e);}
+			break;
+			default :				
+				this.pc1.show();   
+				this.viewer.setVisible(false);
+				this.app._mainForm.pButton.setVisible(true);
+				this.app._mainForm.reportNavigator.setVisible(false);  
+				this.clearLayar();				
+			break;
+		}
+	},
+	clearLayar : function(){
+		try {
+			this.standarLib.clearByTag(this, new Array("0","1"),this.e_nb);
+			this.sg.clear(1); 			
+			this.doLoad();					
+			this.pc1.setActivePage(this.pc1.childPage[0]);	
+			this.e_memo2.setText("");
+			setTipeButton(tbAllFalse);
+		} catch(e) {
+			alert(e);
+		}
+	}
+});

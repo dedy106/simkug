@@ -1,0 +1,108 @@
+<?php
+uses("server_DBConnection_dbLib");
+uses("server_report_basic");
+uses("server_util_AddOnLib");
+global $dbLib;
+$dbLib = new server_DBConnection_dbLib("mssql");
+class server_report_saku2_kopeg_sju_rptPrKlaim extends server_report_basic
+{
+	function getTotalPage()
+	{
+		global $dbLib;
+		$tmp=explode("/",$this->filter);
+		$filter=$tmp[0];
+		$modul=$tmp[1];
+		$periode=$tmp[2];
+		$filter2=$tmp[3];
+		$sql="select 1";
+		
+		$rs = $dbLib->execute($sql);		
+		$totPage = 0;
+		if ($rs)
+		{
+			$count = $rs->fields[0];
+			$totPage = ceil($count / $this->rows);		
+		}		
+		return $totPage;
+	}
+	function getHtml()
+	{
+		
+		global $dbLib;
+		$tmp=explode("/",$this->filter2);
+		$periode=$tmp[0];
+		$nama_cab=$tmp[1];
+		$sql="select a.no_klaim,date_format(a.tanggal,'%d/%m/%Y') as tanggal,a.no_polis,a.keterangan,a.nilai,a.progress,a.no_berkas,
+		f.nama as nama_cust,b.kode_curr,a.lokasi,a.sebab,h.nilai_awal,h.nilai_deduc,h.nilai_nego,h.nilai_final,g.catatan
+from sju_klaim a
+inner join sju_polis_m b on a.no_polis=b.no_polis and a.kode_lokasi=b.kode_lokasi
+inner join sju_cust f on b.kode_cust=f.kode_cust and b.kode_lokasi=f.kode_lokasi
+left join sju_ver_d g on a.no_klaim=g.no_bukti and a.kode_lokasi=g.kode_lokasi and a.progress=g.status
+left join sju_ver_m h on g.no_ver=h.no_ver and g.kode_lokasi=h.kode_lokasi and g.status=h.status $this->filter
+
+";
+
+		$rs = $dbLib->execute($sql);
+		$AddOnLib=new server_util_AddOnLib();	
+		$i=1;
+		echo "<div align='center'>"; 
+		echo $AddOnLib->judul_laporan("data klaim",$this->lokasi,"");
+		echo "<table border='1' cellspacing='0' cellpadding='0' class='kotak'>
+   <tr bgcolor='#CCCCCC'>
+     <td width='30'  align='center' class='header_laporan'>No</td>
+     <td width='80'  align='center' class='header_laporan'>No Klaim</td>
+	  <td width='100'  align='center' class='header_laporan'>No Berkas</td>
+	 <td width='60'  align='center' class='header_laporan'>Tgl Lapor</td>
+     <td width='60'  align='center' class='header_laporan'>DOL</td>
+     <td width='120'  align='center' class='header_laporan'>Policy No</td>
+     <td width='150'  align='center' class='header_laporan'>Tertanggung</td>
+	 <td width='150'  align='center' class='header_laporan'>Lokasi</td>
+	 <td width='150'  align='center' class='header_laporan'>Penyebab Kerugian</td>
+	  <td width='40'  align='center' class='header_laporan'>Curr</td>
+	 <td width='90'  align='center' class='header_laporan'>Nilai Klaim</td>
+	 <td width='90'  align='center' class='header_laporan'>Nilai Klaim yg </td>
+	 <td width='90'  align='center' class='header_laporan'>Settled Claim</td>
+	 <td width='80'  align='center' class='header_laporan'>Status Klaim</td>
+	 <td width='150'  align='center' class='header_laporan'>Remark</td>
+	 
+	  </tr>  ";
+		$nilai=0;$nilai_nego=0;$tagihan=0;
+		while ($row = $rs->FetchNextObject($toupper=false))
+		{
+			$nilai+=$row->nilai;
+			$nilai_nego+=$row->nilai_nego;
+			$nilai_final+=$row->nilai_final;
+		echo "<tr >
+     <td class='isi_laporan' align='center'>$i</td>
+     <td class='isi_laporan'>$row->no_klaim</td>
+	 <td class='isi_laporan'>$row->no_berkas</td>
+	 <td class='isi_laporan'>$row->tanggal</td>
+	 <td class='isi_laporan'>$row->tanggal</td>
+	 <td class='isi_laporan'>$row->no_polis</td>
+	 <td class='isi_laporan'>$row->nama_cust</td>
+	 <td class='isi_laporan'>$row->lokasi</td>
+	  <td class='isi_laporan'>$row->sebab</td>
+	   <td class='isi_laporan'>$row->kode_curr</td>
+     <td class='isi_laporan' align='right'>".number_format($row->nilai,0,',','.')."</td>
+	<td class='isi_laporan' align='right'>".number_format($row->nilai_nego,0,',','.')."</td>
+	 <td class='isi_laporan' align='right'>".number_format($row->nilai_final,0,',','.')."</td>
+	 <td class='isi_laporan'>$row->progress</td>
+	 <td class='isi_laporan'>$row->catatan</td>     </tr>";
+			$i=$i+1;
+		}
+			echo "<tr >
+     <td class='isi_laporan' align='center' colspan='10'>Total</td>
+    
+     <td class='isi_laporan' align='right'>".number_format($nilai,0,',','.')."</td>
+	<td class='isi_laporan' align='right'>".number_format($nilai_nego,0,',','.')."</td>
+	 <td class='isi_laporan' align='right'>".number_format($nilai_final,0,',','.')."</td>
+	 <td class='isi_laporan' colspan='2'>&nbsp;</td>
+	 </tr>";
+		echo "</table><br>";
+		echo "</div>";
+		return "";
+		
+	}
+	
+}
+?>

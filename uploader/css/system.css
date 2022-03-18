@@ -1,0 +1,30 @@
+INPUT{
+  font-family:Arial;
+  font-size:11px;
+  border:1px solid #a3a6a8;
+}
+TEXTAREA{
+  font-family:Arial;
+  font-size:11px;
+  border:1px solid #a3a6a8;
+}
+TD{
+  font-family:Arial;
+  font-size:12px;  
+}
+TH{
+  font-family:Arial;
+  font-size:12px;  
+  font-weight:bold;
+}
+BODY{
+  font-family:Arial;
+  font-size:12px;  
+}
+canvas 	{ background-color: transparent; top: 0; left: 0; position: absolute;}
+canvas.resize-ne { cursor: ne-resize; }
+canvas.resize-se { cursor: se-resize; }
+canvas.resize-sw { cursor: sw-resize; }
+canvas.resize-nw { cursor: nw-resize; }
+canvas.move { cursor: move; }
+canvas.default { cursor: default; }

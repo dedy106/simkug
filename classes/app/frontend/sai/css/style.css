@@ -1,0 +1,49 @@
+.judul {
+	margin: 0;
+	padding: 0 0 5px 0;
+	font-size: 14px;
+	font-weight: normal;
+	color: #168ef4;
+	background-color: inherit;
+}
+.subjudul {
+	margin: 0;
+	padding: 0 0 5px 0;
+	font-size: 12px;
+	font-weight: normal;
+	color: #168ef4;
+	background-color: inherit;
+}
+.kotak {
+	border-collapse : collapse;
+	bordercolor : #111111;
+}
+
+/*** LINKS ***/
+a.link_sai:hover {
+	color: #0000FF;
+	font-weight: normal;
+	text-decoration: underline;
+	background-color: inherit;
+}
+
+a.link_sai:visited {
+	color: #0000FF;
+	font-weight: normal;
+	text-decoration: underline;
+	background-color: inherit;
+}
+
+a.link_sai:active {
+	color: #0000FF;
+	font-weight: normal;
+	text-decoration: none;
+	background-color: inherit;
+}
+
+a.link_sai:link {
+	color: #0000FF;
+	font-weight: normal;
+	text-decoration: none;
+	background-color: inherit;
+}

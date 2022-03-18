@@ -1,0 +1,90 @@
+//***********************************************************************************************
+//*	Copyright (c) 2009 SAI
+//*	 All rights reserved. This program and the accompanying materials
+//*	 are made available under the terms of the Common Public License v1.0
+//*	 which accompanies this distribution, and is available at
+//*	Contributors 
+//* 			SAI, PT											
+//***********************************************************************************************
+window.app_builder_component_controls_childPage = function(owner,options){
+    if ((owner) && (owner instanceof app_builder_component_controls_pageControl)){
+        this.tabWidth = 56;
+        this.onChange = new portalui_eventHandler();
+        this.caption = "Tab";
+        this.image = "";        
+        window.app_builder_component_controls_childPage.prototype.parent.constructor.call(this, owner, options);
+        this.className = "portalui_childPage";      
+        this.selectedCtrl = undefined;
+        this.owner = owner;
+        this.shiftPress = false;
+        this.mouse = undefined;
+        this.activeControl = undefined;  
+		this.addProperty({className:this.className,caption:this.caption,image:this.image, tabWidth:this.tabWidth});	
+		this.addEvent({change:""});
+    }else
+      alert("owner is not systemControl");
+};
+window.app_builder_component_controls_childPage.extend(window.app_builder_component_controls_containerControl);
+//---------------------------- Function ----------------------------------------
+window.app_builder_component_controls_childPage.implement({
+	doDraw: function(canvas){
+	    var n = this.getFullId();
+	    canvas.style.display = "none";
+	    canvas.style.left = 0;
+	    canvas.style.top = 0;
+	    canvas.style.width = "100%";
+	    canvas.style.height = "100%";
+	    canvas.style.background = system.getConfig("form.pagecontrol.color");
+		canvas.style.borderTop =  window.system.getConfig("3dborder.inner.top");
+		canvas.style.borderBottom =  window.system.getConfig("3dborder.inner.bottom");
+	  	canvas.style.borderLeft =  window.system.getConfig("3dborder.inner.top");
+	  	canvas.style.borderRight =  window.system.getConfig("3dborder.inner.bottom");
+	    var html = "<div id='" + n + "form' style='{position: absolute; left: 0; top: 0; width: 100%; height: 100%}' "+
+	        			"onkeydown='window.system.getResource(" + this.resourceId + ").dokeydown(event);'"+
+	              "></div>";
+	    canvas.innerHTML = html;
+	},
+	getClientWidth: function(){
+		return this.owner.getClientWidth();
+	},
+	getClientHeight: function(){
+		return this.owner.getClientHeight();
+	},
+	getCaption: function(){
+		return this.caption;
+	},
+	setCaption: function(data){
+	    if (data != this.caption){
+	        this.caption = data;	        
+			this.setProperty("caption",data);
+	        this.onChange.call(this, "caption");
+	    }
+	},
+	getImage: function(){
+		return this.image;
+	},
+	setImage: function(data){
+	    if (data != this.image){
+	        this.image = data;
+			this.setProperty("image",data);
+	        this.onChange.call(this, "image");
+	    }
+	},
+	getTabWidth: function(){
+		return this.tabWidth;
+	},
+	setTabWidth: function(data){
+	    if (data != this.tabWidth){
+	        this.tabWidth = data;
+			this.setProperty("tabWidth",data);
+	        this.onChange.call(this, "tabWidth");
+	    }
+	},
+	doKeyDown: function(keyCode, buttonState){
+		if (this.activeControl != undefined)
+			this.activeControl.doKeyDown(keyCode, buttonState);  	
+	},
+	setActiveControl: function(control){
+		this.activeControl = control;
+	}
+});

@@ -1,0 +1,17 @@
+README....
+24-06-2010
+upgrade komponen :
+1. dblib.
+	dbSetting adalah namafile konfigurasi setting database yg ada di folder server/server/conf dan berekstensi .conf .
+	jika dbSetting tidak disetting (undefined/blank), maka akan mengambil default setting dari dbSetting.php.
+	ada perubahan setting koneksi database. bisa bebas koneksi.
+	--> saat login runArraySQL(sql,serverVar, initClass, dbSetting);
+	--> new util_dbLib(serverApp, dbSetting);
+	
+	report php.
+	--> sebelum class ditambah script ini :
+		global $dbLib;
+		$dbLib = new server_DBConnection_dbLib(dbSetting);
+		
+		contoh di AMU dan budget
+		

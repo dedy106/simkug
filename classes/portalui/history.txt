@@ -1,0 +1,86 @@
+-->before just single application can run
+	--> esaku
+-->release roojax Controls versi 1.	
+	--> Only Firefox
+	--> bundle in rujax desktop
+-->release roojax Controls versi 2.
+	--> mendukung IE7
+	--> add saiGrid
+	--> mengurangi ukuran image
+-->release jamboo Portalui versi 1.
+	--> Cross browser IE6+, Opera, Firefox
+	--> page model diganti dengan system model
+	--> rujax object dihilangkan
+	--> alert diganti dengan systemAPI.alert(message, info)
+	--> after object.prototyping must have ";"
+	--> prototyping can change with implement function
+		object.implement({
+			fn1: function(){},
+			fn2: function(){},
+			fn3: function(){},
+		});
+	--> Komponen saiSG => saiGrid
+	--> add method on controls/portal UI 
+		--> addStyle
+		--> addCSSText
+-->release jamboo v 1.0.1 (280509)
+	--> support safari(4 528.16), chrome(1.0.154.65)
+		--> dikarenakan yg lama di cssText ada "{}", ini tidak dikenali oleh safari dan chrome
+	--> support shortcut in address bar
+		ex:	
+			http://localhost/jamboo/?app=desktop_app --> if you want run desktop application
+			http://localhost/jamboo/?app=app_saku_app --> if you want run saku application	
+		default :: portalapp_app		
+	--> kodeMenu ditempel disetiap aplikasi, tidak berdasar user.( default "ALLMENU" )		
+		--> app_saku_app = "SAKUMENU"
+		--> app_portal_app = "PORTALMENU"				
+
+<---------------- migrasi roojax ke jamboo -------------------->		
+	Migrasi Komponen roojax controls --> jamboo portalui
+	1. replace controls_ -> portalui_
+	2. replace page. -> system.
+	3. replace GUI_ -> app_saku_
+	4. controls_saiSG -> portalui_saiGrid
+<<<<<<<<<<<<<<<<<<<<<<<<< end >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+roadmap ==>
+----> free lisense
+	-> only compressed js
+	-> only DBLib and mysql support
+		-> function 
+			-> execute
+			-> selectLimit
+			-> getDataProvider
+			-> getDataProviderLimit
+		-> modify dari phpmaker
+----> Combine PHP and JS untuk meningkatkan proses pengolahan data.
+----> flex builder 
+	--> dash board
+	--> data | product viewer
+----> application builder
+
+///--------------------- Coding Bugs
+1. remove item array
+	--> using splice
+		ex: for (var i=0;i < this.childsIndex.length;i++){
+				if (this.childIndex[i] == res){
+					this.childIndex.splice(i,1);
+					break;
+				}
+			}
+		, but's not supported all browser. using temporer array
+			var tmp = [];
+			for (var i in this.childsIndex){
+				if (this.childsIndex[i] != res)
+					tmp[tmp.length] = this.childsIndex[i];
+			}
+			this.childsIndex = tmp;
+	--> using delete
+		-> remove object property
+2. error when call app on LINUX SERVER
+	-> "NO RESPONSE" or error expression
+		--> check name of file arrayList.php in server/server/util/ must be writen "arrayList.php"
+3. login error
+	-> illegal token
+		--> cause error database connection
+	

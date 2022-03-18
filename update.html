@@ -1,0 +1,20 @@
+<script >
+	function doUpdate(){
+		var fr = document.getElementById("frame");
+		fr.src = "admin/subversion.php?command=update";
+	}
+	function doPacker(){
+		var fr = document.getElementById("frame");
+		fr.src = "admin/packjamboo.php";
+	}
+	function doCommit(){
+		var fr = document.getElementById("frame");
+		fr.src= "admin/subversion.php?command=commit";
+	}
+</script>
+<html>
+	<button onclick="doUpdate();">Run Update</button>
+	<button onclick="doPacker();">Run Packer</button>
+	<button onclick="doCommit();">Run Commit</button>
+	<iframe id="frame"  width="100%" height="100%"></iframe>
+</html>

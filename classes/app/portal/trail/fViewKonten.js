@@ -1,0 +1,263 @@
+window.app_portal_trail_fViewKonten = function(owner)
+{
+	try
+	{
+		if (owner)
+		{
+			window.app_portal_trail_fViewKonten.prototype.parent.constructor.call(this, owner);
+			this.className = "app_portal_trail_fViewKonten";			
+			this.maximize();
+			this.app._mainForm.childFormConfig(this, "mainButtonClick","Audit Trail Konten", 2);
+
+			this.p1 = new portalui_panel(this);
+			this.p1.setWidth(720);
+			this.p1.setLeft(10);
+			this.p1.setTop(10);
+			this.p1.setHeight(150);
+			this.p1.setBorder(3);
+			this.p1.setCaption("Filter");
+			this.p1.show();
+			
+			uses("portalui_saiGrid",true);
+			this.sg1 = new portalui_saiGrid(this.p1);
+			this.sg1.setWidth(700);
+			this.sg1.setHeight(100);
+			this.sg1.setLeft(10);
+			this.sg1.setTop(25);
+			this.sg1.setColCount(4);
+			this.sg1.onCellExit.set(this, "doCellExit");
+			this.sg1.onSelectCell.set(this, "doSelectCell");
+			this.sg1.onEllipsClick.set(this, "doEllipseClick");
+			this.sg1.onChange.set(this, "sg1onChange");
+				this.sg1.columns.get(0).setColWidth(250);
+				this.sg1.columns.get(0).setTitle("Filter");
+				this.sg1.columns.get(0).setReadOnly(true);
+				this.sg1.columns.get(1).setTitle("Type");
+				this.sg1.columns.get(1).setButtonStyle(window.bsAuto);
+				var val = new portalui_arrayMap();
+				val.set(1, "All");
+				val.set(2, "=");
+				val.set(3, "Range");
+				val.set(4, "Like");
+				val.set(5, "<=");
+				this.sg1.columns.get(1).setPicklist(val);
+				this.sg1.columns.get(2).setColWidth(150);
+				this.sg1.columns.get(2).setTitle("From");
+				this.sg1.columns.get(3).setColWidth(150);
+				this.sg1.columns.get(3).setTitle("To");
+				this.sg1.setRowCount(3);
+				uses("portalui_reportViewer",true);
+				this.viewer = new portalui_reportViewer(this);
+				this.viewer.setWidth(this.getWidth());
+				this.viewer.setHeight(this.getHeight());
+				this.viewer.setTop(0);
+				this.viewer.setVisible(false);
+				this.app._mainForm.initReport(this, this.viewer,"doSelectedPage","doCloseReportClick", "doAllPageClick", "doPdfClick","doXlsClick",true);
+				uses("server_report_report",true);
+				this.report = new server_report_report();
+				this.report.addListener(this);
+		}
+		uses("util_filterRep",true);
+		this.filterRep = new util_filterRep();
+		this.filterRep.setSGFilterRowTipe(this.sg1, 0,new Array(0,1,2),new  Array("13","13","13"));
+		this.filterRep.setSGFilterRowButtonStyle(this.sg1, 1,new Array(0,1,2),new  Array(2,2,0));
+		
+		uses("util_gridLib",true);
+		this.gridLib = new util_gridLib();
+		uses("util_standar",true);
+		this.standar = new util_standar();
+		this.dbLib = new util_dbLib();
+		this.dbLib.addListener(this);
+		
+		this.userStatus=this.app._userStatus;
+		this.tanda="=";
+		this.lokasi=this.app._lokasi;
+		if (this.userStatus=="A")
+		{
+			this.tanda="All";
+			this.lokasi="";
+		}
+		this.gridLib.SGEditData(this.sg1,0,new Array(0,1,2), new Array("Kode Lokasi",this.tanda,this.lokasi));
+		this.gridLib.SGEditData(this.sg1,1,new Array(0,1,2), new Array("Klp Konten","=",""));
+		this.gridLib.SGEditData(this.sg1,2,new Array(0,1,2), new Array("Periode","=",this.app._periode));
+		
+		this.p_psn = new portalui_panel(this);
+		this.p_psn.setLeft(10);
+		this.p_psn.setTop(10);
+		this.p_psn.setWidth(855);
+		this.p_psn.setHeight(230);
+		this.p_psn.setName('p1');
+		this.p_psn.setBorder(3);
+		this.p_psn.setCaption('Daftar Konten');
+		this.p_psn.hide();
+		this.sg1_psn = new portalui_saiGrid(this.p_psn);
+		this.sg1_psn.setLeft(1);
+		this.sg1_psn.setTop(20);
+		this.sg1_psn.setWidth(850);
+		this.sg1_psn.setHeight(206);
+		this.sg1_psn.setName('sg1mb');
+		this.sg1_psn.setColCount(5);
+		this.sg1_psn.setReadOnly(true);
+		this.sg1_psn.setColTitle(new Array("Kode Konten","NIK Pembuat","Tanggal","Judul","Keterangan"));
+		this.sg1_psn.setColWidth(new Array(4,3,2,1,0),
+			new Array(300,210,100,100,100));
+		this.sg1_psn.onDblClick.set(this, "sg1onDblClick");
+		this.p_desk = new portalui_panel(this);
+		this.p_desk.setLeft(10);
+		this.p_desk.setTop(250);
+		this.p_desk.setWidth(430);
+		this.p_desk.setHeight(210);
+		this.p_desk.setName('p1');
+		this.p_desk.setBorder(3);
+		this.p_desk.setCaption('Deskripsi');
+		this.desk = new portalui_control(this.p_desk);
+		this.desk.setTop(20);
+		this.desk.setLeft(5);
+		this.desk.setWidth(415);
+		this.desk.setHeight(185);
+		this.p_desk.hide();
+		this.p_img = new portalui_panel(this);
+		this.p_img.setLeft(460);
+		this.p_img.setTop(250);
+		this.p_img.setWidth(400);
+		this.p_img.setHeight(210);
+		this.p_img.setName('p1');
+		this.p_img.setBorder(3);
+		this.p_img.setCaption('Gambar ');
+		this.p_img.hide();
+		uses("portalui_image",true);
+		this.img = new portalui_image(this.p_img);
+		this.img.setWidth(398);
+		this.img.setHeight(189);		
+		this.img.setLeft(1);		
+		this.img.setTop(20);	
+		
+		this.cektampil=true;
+	}catch(e)
+	{
+		alert("[app_portal_trail_fViewKonten]::contructor: "+e);
+	}
+};
+window.app_portal_trail_fViewKonten.extend(window.portalui_childForm);
+window.app_portal_trail_fViewKonten.prototype.doEllipseClick= function(sender, col, row)
+{
+	if (row == 0)
+	{			
+		this.filterRep.ListDataSGFilter(this, "Data Lokasi",this.sg1, this.sg1.row, this.sg1.col,
+											  "select kode_lokasi, nama from lokasi ",
+											  "select count(*) from lokasi ",
+											  ["kode_lokasi","nama"],"where",["Kode","Nama"]);
+	}
+	if (row == 1)
+	{			
+		this.filterRep.ListDataSGFilter(this, "Data Klp Konten",this.sg1, this.sg1.row, this.sg1.col,
+											  "select kode_klp, nama from portal_klp_konten ",
+											  "select count(*) from portal_klp_konten ",
+											  ["kode_klp","nama"],"where",["Kode","Nama"]);
+	}
+};
+window.app_portal_trail_fViewKonten.prototype.doSelectCell = function(sender, col, row)
+{
+	if (this.userStatus=="A")
+	{
+		this.filterRep.setSGFilterRowTipe(this.sg1, row,new Array(0,1,2),new  Array("13","13","13"));
+		this.filterRep.setSGFilterRowButtonStyle(this.sg1, row,new Array(0,1,2),new  Array(2,2,0));
+	}else
+	{
+		this.filterRep.setSGFilterRowTipe(this.sg1, row,new Array(0,1,2),new  Array("3","13","13"));
+		this.filterRep.setSGFilterRowButtonStyle(this.sg1, row,new Array(0,1,2),new  Array(3,2,0));
+	}
+	if (row == 2)
+	{
+		if (this.sg1.getCell(1,0) == "All")
+		{
+			this.standar.isiItemsWithPeriodeLok(this.app._kodeLokasiKonsol,this.sg1.columns.get(2).pickList);
+		}else
+		{
+			this.standar.isiItemsWithPeriodeLok(this.sg1.getCell(2,0),this.sg1.columns.get(2).pickList);
+		}
+	}	
+};
+window.app_portal_trail_fViewKonten.prototype.sg1onDblClick = function(sender, col, row)
+{
+	try
+	{
+		if (sender == this.sg1_psn)
+		{
+			var data = this.dbLib.runSQL("select c.folder,a.gambar,a.deskripsi "+
+				"from portal_konten a left outer join portal_dokumen b on a.no_file_dok=b.no_dok_file "+
+				"left outer join portal_file c on b.no_file=c.no_file "+
+				"where a.kode_konten='"+this.sg1_psn.getCell(0,row)+"'");
+			if (data instanceof portalui_arrayMap)
+			{
+				if (data.get(0) != undefined)
+				{
+					data = data.get(0);
+					this.p_desk.show();
+					this.p_img.show();
+					var canvas = this.desk.getCanvas();
+					canvas.style.overflow="auto";
+					canvas.innerHTML="<p>"+data.get("deskripsi")+"</p>";
+					this.img.setImage("server/"+data.get("folder")+"/"+data.get("gambar"));
+				}
+			}
+		}
+	}catch(e)
+	{
+		page.alert(this, e,"");
+	}
+};
+window.app_portal_trail_fViewKonten.prototype.mainButtonClick = function(sender)
+{
+	try
+	{
+		if (sender == this.app._mainForm.bClear2)
+		{ 
+			if (this.cektampil)
+			{
+				this.gridLib.SGEditData(this.sg1,0,new Array(0,1,2), new Array("Kode Lokasi",this.tanda,this.lokasi));
+				this.gridLib.SGEditData(this.sg1,1,new Array(0,1,2), new Array("Klp Konten","=",""));
+				this.gridLib.SGEditData(this.sg1,2,new Array(0,1,2), new Array("Periode","=",this.app._periode));
+			}else
+			{
+				this.p_psn.hide();
+				this.p_desk.hide();
+				this.p_img.hide();
+				this.p1.show();
+			}
+			this.cektampil=true;
+		}else
+		{
+			this.cektampil=false;
+			this.p1.hide();
+			this.filter = this.filterRep.filterStr("kode_lokasi",this.sg1.getCell(1,0),this.sg1.getCell(2,0),this.sg1.getCell(3,0),"where")+
+						this.filterRep.filterStr("kode_klp",this.sg1.getCell(1,1),this.sg1.getCell(2,1),this.sg1.getCell(3,1),"and")+
+						this.filterRep.filterStr("periode",this.sg1.getCell(1,2),this.sg1.getCell(2,2),this.sg1.getCell(3,2),"and");
+			var data = this.dbLib.runSQL("select kode_konten,nik_buat,date_format(tanggal,'%d-%m-%Y') as tgltlp,judul,keterangan from portal_konten "+this.filter);
+			if (data instanceof portalui_arrayMap)
+			{
+				if (data.get(0) != undefined)
+				{
+					this.sg1_psn.clear();
+					this.sg1_psn.setData(data);										
+					this.sg1_psn.setColWidth(new Array(4,3,2,1,0),new Array(300,210,100,100,100));
+				}
+			}
+			this.p_psn.show();
+		}
+    }catch(e)
+	{
+		alert("[app_portal_trail_fViewKonten]::mainButtonClick:"+e);
+	}
+};
+window.app_portal_trail_fViewKonten.prototype.sg1onChange = function(sender, col , row)
+{
+    if (col==1)
+	{
+     if (this.sg1.getCell(1,row)=="All")
+	 {
+		this.sg1.setCell(2,row,"");
+		this.sg1.setCell(3,row,"");
+	 }
+	} 
+};

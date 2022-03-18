@@ -1,0 +1,586 @@
+window.app_saku3_transaksi_yakes21_pbh_fSpb = function(owner)
+{
+	if (owner)
+	{
+		window.app_saku3_transaksi_yakes21_pbh_fSpb.prototype.parent.constructor.call(this,owner);
+		this.className  = "app_saku3_transaksi_yakes21_pbh_fSpb";
+		this.itemsValue = new arrayList();
+		this.maximize();
+		this.app._mainForm.childFormConfig(this, "mainButtonClick","Form SPB", 0);	
+		
+		uses("portalui_uploader;saiCBBL;saiEdit;datePicker;saiGrid;sgNavigator;pageControl;checkBox");
+		this.e_periode = new portalui_saiLabelEdit(this,{bound:[20,11,202,20],caption:"Periode",tag:2,readOnly:true,change:[this,"doChange"],visible:false});
+		this.l_tgl1 = new portalui_label(this,{bound:[20,11,100,18],caption:"Tanggal", underline:true});
+		this.dp_d1 = new portalui_datePicker(this,{bound:[120,11,100,18],selectDate:[this,"doSelectDate"]}); 		
+		
+		this.pc2 = new pageControl(this,{bound:[10,10,1000,440], childPage:["Data SPB","List SPB"]});		
+		this.sg3 = new saiGrid(this.pc2.childPage[1],{bound:[1,5,this.pc2.width-5,this.pc2.height-35],colCount:5,tag:9,
+				colTitle:["No SPB","Tanggal","Deskripsi","Nilai","Pilih"],
+				colWidth:[[4,3,2,1,0],[70,100,300,80,100]],
+				colFormat:[[3,4],[cfNilai,cfButton]],readOnly:true,
+				click:[this,"doSgBtnClick3"], colAlign:[[4],[alCenter]],
+				dblClick:[this,"doDoubleClick3"],autoAppend:false,defaultRow:1});		
+		this.sgn3 = new portalui_sgNavigator(this.pc2.childPage[1],{bound:[1,this.pc2.height-25,this.pc2.width-1,25],buttonStyle:3,grid:this.sg3,pager:[this,"doPager3"]});
+		this.bLoad3 = new portalui_imageButton(this.sgn3,{bound:[this.sgn3.width - 25,2,22,22],image:"icon/"+system.getThemes()+"/reload.png", hint:"Load Data Jurnal",click:[this,"doLoad3"]});		
+		
+		this.e_nb = new portalui_saiLabelEdit(this.pc2.childPage[0],{bound:[10,12,200,20],caption:"No Bukti",maxLength:30,readOnly:true});
+		this.i_gen = new portalui_imageButton(this.pc2.childPage[0],{bound:[215,12,20,20],hint:"Generate",image:"icon/"+system.getThemes()+"/tabCont2.png",click:[this,"doClick"]});		
+		this.e_dok = new saiLabelEdit(this.pc2.childPage[0],{bound:[10,16,450,20],caption:"No Dokumen", maxLength:50});				
+		this.l_tgl2 = new portalui_label(this.pc2.childPage[0],{bound:[790,16,100,18],caption:"Due Date", underline:true});
+		this.dp_d2 = new portalui_datePicker(this.pc2.childPage[0],{bound:[890,16,98,18]}); 						
+		this.e_ket = new saiLabelEdit(this.pc2.childPage[0],{bound:[10,17,450,20],caption:"Deskripsi", maxLength:150});				
+		this.e_nilaispb = new saiLabelEdit(this.pc2.childPage[0],{bound:[790,17,200,20],caption:"Total SPB", tag:1, readOnly:true, tipeText:ttNilai, text:"0",change:[this,"doChange"]});					
+		
+		this.pc1 = new pageControl(this.pc2.childPage[0],{bound:[1,12,996,338], childPage:["Filter Data","Daftar PB","Daftar Transfer","Otorisasi","File Dok","Edit SPB"]});		
+		this.cb_lokasi = new saiCBBL(this.pc1.childPage[0],{bound:[20,11,220,20],caption:"Lokasi", multiSelection:false, maxLength:10, tag:9});
+		this.c_bank = new saiCB(this.pc1.childPage[0],{bound:[20,12,200,20],caption:"Bank Transfer",items:["NONBT","MANDIRI","BNI","BRI","X-MANDIRI"], readOnly:true,tag:9});	
+		this.bTampil = new button(this.pc1.childPage[0],{bound:[120,19,98,18],caption:"Tampil PB",click:[this,"doLoad"]});		
+
+		this.sg5 = new saiGrid(this.pc1.childPage[1],{bound:[1,5,this.pc1.width-5,this.pc1.height-35],colCount:7,tag:0,
+		        colTitle:["Status","No PB","Tanggal","Deskripsi","Nilai PB","Lok. Pengaju","Bank Trans"],
+				colWidth:[[6,5,4,3,2,1,0],[100,80,100,380,80,120,80]],colFormat:[[4],[cfNilai]],										
+				readOnly:true,buttonStyle:[[0],[bsAuto]],picklist:[[0],[new portalui_arrayMap({items:["SPB","INPROG"]})]],				
+				nilaiChange:[this,"doNilaiChange"],change:[this,"doChangeCell5"],autoAppend:false,defaultRow:1});		
+		this.sgn5 = new portalui_sgNavigator(this.pc1.childPage[1],{bound:[1,this.pc1.height-25,this.pc1.width-1,25],buttonStyle:3,grid:this.sg5,pager:[this,"doPager5"]});		
+		
+		this.sg4 = new saiGrid(this.pc1.childPage[2],{bound:[1,5,this.pc1.width-5,this.pc1.height-35],colCount:8,tag:9,
+				colTitle:["Bank","Atensi","No Rekening","Nama Rekening","Bruto","Potongan","Netto","Jenis"],
+				colWidth:[[7,6,5,4,3,2,1,0],[80,100,80,100,250,100,150,170]],										
+				columnReadOnly:[true,[0,1,2,3,4,5,6,7],[]],				
+				colFormat:[[4,5,6],[cfNilai,cfNilai,cfNilai]],												
+				defaultRow:1,autoAppend:false});
+		this.sgn4 = new portalui_sgNavigator(this.pc1.childPage[2],{bound:[1,this.pc1.height-25,this.pc1.width-1,25],buttonStyle:3,grid:this.sg4,pager:[this,"doPager4"]});
+		
+		this.cb_bdh = new saiCBBL(this.pc1.childPage[3],{bound:[20,15,220,20],caption:"NIK Bendahara", multiSelection:false, maxLength:10, tag:2,change:[this,"doChange"]});						
+		this.e_jab1 = new saiLabelEdit(this.pc1.childPage[3],{bound:[20,115,452,20],caption:"Jabatan", maxLength:50,tag:2});				
+		this.cb_sah = new saiCBBL(this.pc1.childPage[3],{bound:[20,16,220,20],caption:"NIK Mengesahkan", multiSelection:false, maxLength:10, tag:2,change:[this,"doChange"]});						
+		this.e_jab2 = new saiLabelEdit(this.pc1.childPage[3],{bound:[20,116,452,20],caption:"Jabatan", maxLength:50,tag:2});				
+		this.cb_fiat = new saiCBBL(this.pc1.childPage[3],{bound:[20,17,220,20],caption:"NIK Fiatur", multiSelection:false, maxLength:10, tag:2,change:[this,"doChange"]});						
+		this.e_jab3 = new saiLabelEdit(this.pc1.childPage[3],{bound:[20,117,452,20],caption:"Jabatan", maxLength:50,tag:2});				
+		
+		this.sgDok = new saiGrid(this.pc1.childPage[4],{bound:[1,5,this.pc1.width-5,this.pc1.height-35],colCount:5, tag:9,
+				colTitle:["KdDok","Jenis Dokumen","Path File","DownLoad","No Ref"],
+				colWidth:[[4,3,2,1,0],[100,80,380,200,80]], 
+				columnReadOnly:[true,[0,1,2,3,4],[]],					
+				colFormat:[[3],[cfButton]], 
+				click:[this,"doSgBtnClickDok"], colAlign:[[3],[alCenter]],
+				readOnly:true,change:[this,"doGridChange"],rowCount:1,tag:9});		
+		this.sgnDok = new sgNavigator(this.pc1.childPage[4],{bound:[1,this.pc1.height - 25,this.pc1.width-1,25],buttonStyle:1, grid:this.sgDok});
+
+		this.cb_pbAdd = new portalui_saiCBBL(this.pc1.childPage[5],{bound:[20,18,220,20],caption:"No PB Tambah",multiSelection:false,tag:9});					
+		this.bAdd = new button(this.pc1.childPage[5],{bound:[120,19,98,18],caption:"Tambah Data",click:[this,"doAdd"]});	
+		
+		this.rearrangeChild(10, 23);
+		this.pc2.childPage[0].rearrangeChild(10, 23);	
+		this.pc1.childPage[0].rearrangeChild(10, 23);	
+		this.pc1.childPage[3].rearrangeChild(10, 23);	
+		this.pc1.childPage[5].rearrangeChild(10, 23);	
+					
+		uses("server_report_report;portalui_reportViewer");
+		this.viewer = new portalui_reportViewer(this, {bound:[0,0,this.getWidth(), this.getHeight()],visible:false});
+		this.viewer.hide();
+		this.app._mainForm.initReport(this, this.viewer,"doSelectedPage","doCloseReportClick", "doRowPerPageChange", "doPdfClick","doXlsClick",true);
+		this.report = new server_report_report();
+		this.report.addListener(this);
+		
+		setTipeButton(tbAllFalse);
+		this.maximize();		
+		this.setTabChildIndex();				
+		
+		try {
+			this.dbLib = new util_dbLib();
+			this.dbLib.addListener(this);
+			uses("util_standar");
+			this.standarLib = new util_standar();
+			this.stsSimpan = 1;			
+			this.doSelectDate(this.dp_d1,this.dp_d1.year,this.dp_d1.month,this.dp_d1.day);
+
+			this.cb_lokasi.setSQL("select kode_lokasi, nama from lokasi where flag_konsol='0'",["kode_lokasi","nama"],false,["Kode","Nama"],"and","Data Lokasi",true);						
+			this.cb_bdh.setSQL("select nik, nama from karyawan where flag_aktif='1' and kode_lokasi='"+this.app._lokasi+"'",["nik","nama"],false,["NIK","Nama"],"and","Data Karyawan",true);			
+			this.cb_sah.setSQL("select nik, nama from karyawan where flag_aktif='1' and kode_lokasi='"+this.app._lokasi+"'",["nik","nama"],false,["NIK","Nama"],"and","Data Karyawan",true);			
+			this.cb_fiat.setSQL("select nik, nama from karyawan where flag_aktif='1' and kode_lokasi='"+this.app._lokasi+"'",["nik","nama"],false,["NIK","Nama"],"and","Data Karyawan",true);			
+			
+			var data = this.dbLib.getDataProvider("select kode_spro,flag,keterangan from spro where kode_spro in ('NIKBDH') and kode_lokasi = '"+this.app._lokasi+"'",true);			
+			if (typeof data == "object"){
+				var line;
+				for (var i in data.rs.rows){
+					line = data.rs.rows[i];																												
+					if (line.kode_spro == "NIKBDH") {
+						this.cb_bdh.setText(line.flag);							
+					}
+				}
+			}
+
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	}
+};
+window.app_saku3_transaksi_yakes21_pbh_fSpb.extend(window.childForm);
+window.app_saku3_transaksi_yakes21_pbh_fSpb.implement({	
+	doSgBtnClickDok: function(sender, col, row){
+		try{
+			if (col === 3) window.open("server/media/"+this.sgDok.getCell(2,row));
+		}catch(e){
+			alert(e);
+		}
+	},
+	getOtorisasi: function() {
+		try {
+			if (this.e_nilaispb.getText() != "") {
+				var strSQL = "select nik_sah,jab_sah,nik_fiat,jab_fiat from pbh_otorisasi where "+nilaiToFloat(this.e_nilaispb.getText())+" between nilai_min and nilai_max and kode_lokasi='"+this.app._lokasi+"'";
+				var data = this.dbLib.getDataProvider(strSQL,true);
+				if (typeof data == "object"){
+					var line = data.rs.rows[0];							
+					if (line != undefined){		
+						this.cb_sah.setText(line.nik_sah);					
+						//this.e_jab2.setText(line.jab_sah);					
+						this.cb_fiat.setText(line.nik_fiat);					
+						//this.e_jab3.setText(line.jab_fiat);					
+					} 
+				}
+			}
+		}
+		catch(e) {
+			alert(e);
+		}
+	},
+	doAdd: function() {	
+		try {
+			var temu = false;
+			for (var i = 0; i < this.sg5.rows.getLength();i++){
+				if (this.sg5.rowValid(i) && this.sg5.cells(1,i) == this.cb_pbAdd.getText()){
+					temu = true;
+					break;
+				}
+			}
+			if (!temu) {			
+				var strSQL = "select 'SPB' as status,a.no_pb,convert(varchar,a.tanggal,103) as tgl,a.keterangan,a.nilai,b.nama as lokasi,a.bank_trans "+
+							"from pbh_pb_m a inner join lokasi b on a.kode_lokasi=b.kode_lokasi "+
+							"where a.no_pb = '"+this.cb_pbAdd.getText()+"' and a.progress='2' and a.no_spb='-' and a.modul not in ('IFCLOSE','PJPTG')";					
+				var data = this.dbLib.getDataProvider(strSQL,true);
+				if (typeof data == "object"){
+					var line = data.rs.rows[0];							
+					if (line != undefined){								
+						this.sg5.appendData([line.status.toUpperCase(),line.no_pb,line.tgl,line.keterangan,floatToNilai(line.nilai),line.lokasi,line.kode_pp]);		 
+					}					
+				}			
+			}			
+			this.pc1.setActivePage(this.pc1.childPage[1]);
+		}
+		catch(e) {
+			alert(e);
+		}
+
+	},
+	isiPBAdd: function() {	
+		try {			
+			if (this.c_bank.getText() == "NONBT") var filterData1 = " ";
+			else var filterData1 = " a.bank_trans='"+this.c_bank.getText()+"' and ";			
+
+			if (this.cb_lokasi.getText() == "") var filterData2 = " ";
+			else var filterData2 = " a.kode_lokasi='"+this.cb_lokasi.getText()+"' and ";
+
+			var filter = filterData1 + filterData2;
+			var strSQL = "select no_pb,keterangan from pbh_pb_m where "+filter+" progress='2' and no_spb='-' ";					
+			this.cb_pbAdd.setSQL(strSQL,["no_pb","keterangan"],false,["No PB","Keterangan"],"and","Data PB",true);						
+		}
+		catch(e) {
+			alert(e);
+		}
+	},
+	mainButtonClick: function(sender){
+		if (sender == this.app._mainForm.bClear)
+			system.confirm(this, "clear", "screen akan dibersihkan?","form inputan ini akan dibersihkan");	
+		if (sender == this.app._mainForm.bSimpan)
+			system.confirm(this, "simpan", "Apa data sudah benar?","data diform ini apa sudah benar.");	
+		if (sender == this.app._mainForm.bEdit)
+			system.confirm(this, "ubah", "Apa perubahan data sudah benar?","perubahan data diform ini akan disimpan.");	
+		if (sender == this.app._mainForm.bHapus)
+			system.confirm(this, "hapus", "Yakin data akan dihapus?","data yang sudah disimpan tidak bisa di<i>retrieve</i> lagi.");	
+	},
+	simpan: function(){			
+		try{						
+			if (this.stsSimpan == 1) this.doClick();
+			if (this.standarLib.checkEmptyByTag(this, [0,1,2])){
+				try{														
+					uses("server_util_arrayList");
+					var sql = new server_util_arrayList();
+					if (this.stsSimpan == 0) {
+						sql.add("delete from spb_m where no_spb = '"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						// sql.add("delete from spb_j where no_spb = '"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("update pbh_pb_m set progress='2', no_spb='-' where no_spb = '"+this.e_nb.getText()+"'");											
+					}			
+
+					sql.add("insert into spb_m (no_spb,no_dokumen,bank_trans,kode_lokasi,periode,nik_user,tgl_input,tanggal,due_date,keterangan,nik_buat,nik_sah,nik_fiat,nik_bdh,lok_bayar,no_kas,nilai,modul,no_sah,no_fiat,progress,kode_ppasal, jab_bdh,jab_sah,jab_fiat) values "+
+							"('"+this.e_nb.getText()+"','"+this.e_dok.getText()+"','"+this.c_bank.getText()+"','"+this.app._lokasi+"','"+this.e_periode.getText()+"','"+this.app._userLog+"',getdate(),'"+this.dp_d1.getDateString()+"','"+this.dp_d2.getDateString()+"','"+this.e_ket.getText()+"','"+this.app._userLog+"','"+this.cb_sah.getText()+"','"+this.cb_fiat.getText()+"','"+this.cb_bdh.getText()+"','"+this.app._lokasi+"','X',"+nilaiToFloat(this.e_nilaispb.getText())+",'SPB','-','-','0','-', '"+this.e_jab1.getText()+"','"+this.e_jab2.getText()+"','"+this.e_jab3.getText()+"')");
+														
+					for (var i = 0; i < this.sg5.rows.getLength();i++){
+						if (this.sg5.rowValid(i) && this.sg5.cells(0,i) == "SPB"){							
+							sql.add("update pbh_pb_m set progress='3', no_spb='"+this.e_nb.getText()+"' where no_pb = '"+this.sg5.cells(1,i)+"' ");													
+							
+							//jurnal kas dari PB tidak dr spb
+							// sql.add("insert into spb_j (no_spb,no_dokumen,tanggal,no_urut,kode_akun,keterangan,dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,periode,nik_user,tgl_input,kode_curr,kurs)  "+
+							// 		"select '"+this.e_nb.getText()+"',no_pb,'"+this.dp_d1.getDateString()+"',no_urut,kode_akun,keterangan,dc,nilai,kode_pp,kode_drk,'"+this.app._lokasi+"',modul,jenis,'"+this.e_periode.getText()+"','"+this.app._userLog+"',getdate(),'IDR',1 "+
+							// 		"from pbh_pb_j where no_pb='"+this.sg5.cells(1,i)+"' and jenis in ('BEBAN','TAMBAH','PAJAK','PANJAR','TUJUAN','PENSIUN','PEGAWAI') ");	//SUMBER tidak dibawa, SPB pinbuk bisa gabung dgn yg lain						
+						}
+					}
+
+					setTipeButton(tbAllFalse);					
+					this.dbLib.execArraySQL(sql);
+				}
+				catch(e){
+					system.alert(this, e,"");
+				}
+			}
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	},
+	doModalResult: function(event, modalResult){
+		if (modalResult != mrOk) return false;
+		switch (event){
+			case "clear" :
+				if (modalResult == mrOk)
+					this.standarLib.clearByTag(this, new Array("0","1"),this.e_nb);
+					this.sg4.clear(1); this.sg5.clear(1); this.sg3.clear(1); this.sgDok.clear(1);				
+					this.pc2.setActivePage(this.pc2.childPage[0]);					
+					setTipeButton(tbAllFalse);		
+					this.doLoad3();		
+					this.doLoad();	
+				break;
+			case "simpan" :															
+			case "ubah" :																			
+				this.preView = "1";								
+				this.app._periode = this.dbLib.getPeriode(this.app._lokasi);																	
+				if (nilaiToFloat(this.e_nilaispb.getText()) <= 0) {
+					system.alert(this,"Transaksi tidak valid.","Total Nilai SPB tidak boleh nol atau kurang.");
+					return false;						
+				}				
+				else 
+				this.simpan();
+				break;				
+			case "simpancek" : this.simpan();			
+				break;			
+			case "hapus" :	
+				this.preView = "0";				
+				uses("server_util_arrayList");
+				var sql = new server_util_arrayList();
+				sql.add("delete from spb_m where no_spb = '"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+				// sql.add("delete from spb_j where no_spb = '"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+				sql.add("update pbh_pb_m set progress='2', no_spb='-' where no_spb = '"+this.e_nb.getText()+"' ");											
+				setTipeButton(tbAllFalse);	
+				this.dbLib.execArraySQL(sql);
+				
+				break;				
+		}
+	},
+	doSelectDate: function(sender, y,m,d){
+		if (m < 10) m = "0" + m;			
+		this.e_periode.setText(y+""+m);				
+		if (this.stsSimpan == 1) {
+			this.doClick();				
+			this.doLoad3();			
+		}
+	},
+	doChange:function(sender){
+		if (sender == this.e_periode && this.stsSimpan ==1) this.doClick();		
+
+		if (sender == this.e_nilaispb && this.e_nilaispb.getText()!="0") {
+			this.getOtorisasi();
+		}
+		if (sender == this.cb_bdh && this.cb_bdh.getText()!="") {
+			var strSQL = "select jabatan from karyawan where nik='"+this.cb_bdh.getText()+"'";
+			var data = this.dbLib.getDataProvider(strSQL,true);
+			if (typeof data == "object"){
+				var line = data.rs.rows[0];							
+				if (line != undefined){		
+					this.e_jab1.setText(line.jabatan);					
+				} 
+			}
+		}
+		if (sender == this.cb_sah && this.cb_sah.getText()!="") {
+			var strSQL = "select jabatan from karyawan where nik='"+this.cb_sah.getText()+"'";
+			var data = this.dbLib.getDataProvider(strSQL,true);
+			if (typeof data == "object"){
+				var line = data.rs.rows[0];							
+				if (line != undefined){		
+					this.e_jab2.setText(line.jabatan);					
+				} 
+			}
+		}
+		if (sender == this.cb_fiat && this.cb_fiat.getText()!="") {
+			var strSQL = "select jabatan from karyawan where nik='"+this.cb_fiat.getText()+"'";
+			var data = this.dbLib.getDataProvider(strSQL,true);
+			if (typeof data == "object"){
+				var line = data.rs.rows[0];							
+				if (line != undefined){		
+					this.e_jab3.setText(line.jabatan);					
+				} 
+			}
+		}
+
+	},
+	doClick:function(sender){
+		if (this.e_periode.getText()!= "") {
+			if (this.stsSimpan == 0) {					
+				this.sg4.clear(1); this.sg5.clear(1); this.sg3.clear(1); 				
+				//this.bLoad.show();				
+				this.e_nilaispb.setText("0");
+				this.doLoad3();
+				this.doLoad();
+			}
+			this.stsSimpan = 1;
+			this.e_nb.setText(this.standarLib.noBuktiOtomatis(this.dbLib,"spb_m","no_spb",this.app._lokasi+"-SPB"+this.e_periode.getText().substr(2,4)+".","0000"));						
+			this.e_dok.setFocus();
+			setTipeButton(tbSimpan);			
+		}		
+	},
+	doLoad: function(sender){				
+		try {
+			if (this.c_bank.getText() == "NONBT") var filterData1 = " ";
+			else var filterData1 = " a.bank_trans='"+this.c_bank.getText()+"' and ";			
+
+			if (this.cb_lokasi.getText() == "") var filterData2 = " ";
+			else var filterData2 = " a.kode_lokasi='"+this.cb_lokasi.getText()+"' and ";
+
+			var filter = filterData1 + filterData2;
+			var strSQL = "select 'INPROG' as status,a.no_pb,convert(varchar,a.tanggal,103) as tgl,a.keterangan,a.nilai,b.nama as lokasi,a.bank_trans "+
+						"from pbh_pb_m a inner join lokasi b on a.kode_lokasi=b.kode_lokasi "+
+						"where "+filter+" a.progress='2' and a.no_spb='-' and a.modul not in ('IFCLOSE','PJPTG')";					 
+			var data = this.dbLib.getDataProvider(strSQL,true);
+			if (typeof data == "object" && data.rs.rows[0] != undefined){
+				var line;
+				this.sg5.clear();
+				for (var i in data.rs.rows){
+					line = data.rs.rows[i];																	
+					this.sg5.appendData([line.status.toUpperCase(),line.no_pb,line.tgl,line.keterangan,floatToNilai(line.nilai),line.lokasi,line.bank_trans]);
+				}
+			} else this.sg5.clear(1);	
+			this.sg5.validasi();
+			this.pc1.setActivePage(this.pc1.childPage[1]);
+		}
+		catch(e) {
+			alert(e);
+		}
+	},	
+	doChangeCell5: function(sender, col , row) {
+		if (col == 0) {
+			this.sg5.validasi();
+			this.doLoadRek();			
+		}		
+	},
+	doNilaiChange: function(){
+		try{
+			var tot = 0;			
+			for (var i = 0; i < this.sg5.rows.getLength();i++){
+				if (this.sg5.rowValid(i) && this.sg5.cells(4,i) != "" && this.sg5.cells(0,i) == "SPB"){
+					tot += nilaiToFloat(this.sg5.cells(4,i));					
+				}
+			}			
+			this.e_nilaispb.setText(floatToNilai(tot));			
+		}catch(e)
+		{
+			alert("[app_saku_gl_transaksi_fJu2]::doNilaiChange:"+e);
+		}
+	},	
+	doLoadRek: function() {
+		var line = noPB = "";		
+		for (var i = 0; i < this.sg5.rows.getLength();i++){
+			if (this.sg5.rowValid(i) && this.sg5.cells(0,i) == "SPB"){
+				noPB += ",'"+this.sg5.cells(1,i)+"'";
+			}
+		}
+
+		noPB = noPB.substr(1);							
+		if (noPB != "") {					
+            var strSQL = "select a.bank,a.nama,a.no_rek,a.nama_rek,a.bruto,a.pajak,a.nilai, case when a.modul='PINBUK-C' then 'SUMBER' else 'TUJUAN' end jenis "+
+						 "from pbh_rek a inner join pbh_pb_m b on a.no_bukti=b.no_pb and a.kode_lokasi=b.kode_lokasi "+
+						 "where b.no_pb in ("+noPB+") ";   						 
+			var data = this.dbLib.getDataProvider(strSQL,true);
+			if (typeof data == "object" && data.rs.rows[0] != undefined){
+				var line;
+				this.sg4.clear();
+				for (var i in data.rs.rows){
+					line = data.rs.rows[i];												
+					this.sg4.appendData([line.bank,line.nama,line.no_rek,line.nama_rek,floatToNilai(line.bruto),floatToNilai(line.pajak),floatToNilai(line.nilai),line.jenis.toUpperCase()]);
+				}
+			} else this.sg4.clear(1);		
+			
+			this.sgDok.clear();
+			var data = this.dbLib.getDataProvider(
+							"select a.no_bukti,b.kode_jenis,b.nama,a.no_gambar "+
+							"from pbh_dok a "+
+							"		inner join pbh_dok_ver b on a.kode_jenis=b.kode_jenis "+							
+							"where a.no_bukti in ("+noPB+") order by a.no_bukti,a.nu",true);
+			if (typeof data == "object" && data.rs.rows[0] != undefined){
+				var line;					
+				for (var i in data.rs.rows){
+					line = data.rs.rows[i];							
+					this.sgDok.appendData([line.kode_jenis, line.nama, line.no_gambar,"DownLoad",line.no_bukti]);						
+				}
+			} else this.sgDok.clear(1);
+		}
+		else system.alert(this,"Data tidak valid.","Tidak ada PB yang berstatus SPB.");			
+	},	
+	doRequestReady: function(sender, methodName, result){
+		if (sender == this.dbLib){
+			try{   
+				switch(methodName){
+	    			case "execArraySQL" :	    				
+						if (result.toLowerCase().search("error") == -1){
+							if (this.preView == "1") {								
+								//this.nama_report="server_report_saku3_pbh_ypt_rptSpb";
+								//this.filter = " where a.kode_lokasi='"+this.app._lokasi+"' and a.no_spb='"+this.e_nb.getText()+"' ";
+								this.filter2 = "";
+								this.viewer.prepare();
+								this.viewer.setVisible(true);
+								this.app._mainForm.pButton.setVisible(false);
+								this.app._mainForm.reportNavigator.setVisible(true);
+								this.viewer.setTotalPage(this.report.getTotalPage(this.nama_report,this.filter,1,this.filter2));
+								this.app._mainForm.reportNavigator.setTotalPage(this.viewer.getTotalPage());
+								this.app._mainForm.reportNavigator.rearrange();
+								this.showFilter = undefined;
+								this.viewer.useIframe(this.report.previewWithHeader(this.nama_report,this.filter, 1,  1, this.showFilter, this.app._namalokasi,this.filter2));
+								this.page = 1;
+								this.allBtn = false;
+								this.pc2.hide();
+							} 
+							else {
+								system.info(this,"Transaksi telah sukses tereksekusi (No Bukti : "+ this.e_nb.getText()+")","");							
+								this.clearLayar();
+							} 
+						}else system.info(this,result,"");
+	    			break;					
+	    		}    		
+			}
+			catch(e){
+				systemAPI.alert("step : "+step+"; error = "+e);
+			}
+	    }
+	},
+	doCloseReportClick: function(sender){
+		switch(sender.getName()){
+			case "PreviewBtn" :        
+				window.open(this.report.previewWithHeader(this.nama_report,this.filter,1,1, this.showFilter,this.app._namalokasi,this.filter2));
+			break;
+			case "PrintBtn" :
+				this.viewer.useIframe(this.report.previewWithHeader(this.nama_report,this.filter,1,1, this.showFilter,this.app._namalokasi,this.filter2));
+				try
+				{
+					window.frames[this.viewer.getFullId() +"_iframe"].focus();
+					window.frames[this.viewer.getFullId() +"_iframe"].print();
+				}catch(e)
+				{alert(e);}
+			break;
+			default :
+				this.pc2.show();   
+				this.viewer.setVisible(false);
+				this.app._mainForm.pButton.setVisible(true);
+				this.app._mainForm.reportNavigator.setVisible(false);  
+				this.clearLayar();				
+			break;
+		}
+	},
+	clearLayar : function(){
+		try {
+			this.standarLib.clearByTag(this, new Array("0","1"),this.e_nb);			
+			this.sg4.clear(1); this.sg5.clear(1); this.sg3.clear(1); 
+			this.pc2.setActivePage(this.pc2.childPage[0]);
+			this.pc1.setActivePage(this.pc1.childPage[0]);			
+			setTipeButton(tbAllFalse);			
+			this.doClick();			
+			this.doLoad3();
+			this.doLoad();
+		} catch(e) {
+			alert(e);
+		}
+	},
+	doLoad3:function(sender){
+		//PB belum di proses di lainnya 
+		var strSQL = "select a.no_spb,convert(varchar,a.tanggal,103) as tgl,a.keterangan,a.nilai "+
+		             "from spb_m a "+
+					 "left join ( "+
+					 " 			select distinct no_spb from pbh_pb_m where no_spb <> '-' and progress<>'3') b on a.no_spb=b.no_spb "+					 					 
+					 "where b.no_spb is null and a.periode='"+this.e_periode.getText()+"' and a.kode_lokasi='"+this.app._lokasi+"' and a.progress in ('0','S','F')";		
+		var data = this.dbLib.getDataProvider(strSQL,true);
+		if (typeof data == "object" && data.rs.rows[0] != undefined){
+			this.dataJU3 = data;
+			this.sgn3.setTotalPage(Math.ceil(data.rs.rows.length/20));
+			this.sgn3.rearrange();
+			this.doTampilData3(1);
+		} else this.sg3.clear(1);			
+	},
+	doTampilData3: function(page) {
+		this.sg3.clear();
+		var line;
+		this.page = page;
+		var start = (page - 1) * 20;
+		var finish = (start + 20 > this.dataJU3.rs.rows.length? this.dataJU3.rs.rows.length:start+20);
+		for (var i=start;i<finish;i++){
+			line = this.dataJU3.rs.rows[i];													
+			this.sg3.appendData([line.no_spb,line.tgl,line.keterangan,floatToNilai(line.nilai),"Pilih"]); 
+		}
+		this.sg3.setNoUrut(start);
+	},
+	doPager3: function(sender, page) {
+		this.doTampilData3(page);
+	},
+	doSgBtnClick3: function(sender, col, row){
+		try{
+			if (col === 4) {
+				this.doDoubleClick3(this.sg3,0,row);
+			}
+		}catch(e){
+			alert(e);
+		}
+	},
+	doDoubleClick3: function(sender, col , row) {
+		try{
+			if (this.sg3.cells(0,row) != "") {
+				this.pc2.setActivePage(this.pc2.childPage[0]);																		
+				this.pc1.setActivePage(this.pc1.childPage[0]);	
+				
+				setTipeButton(tbUbahHapus);
+				this.stsSimpan = 0;								
+				this.e_nb.setText(this.sg3.cells(0,row));								
+				this.isiPBAdd();
+								
+				var strSQL = "select * from spb_m where no_spb = '"+this.e_nb.getText()+"' and kode_lokasi='"+this.app._lokasi+"'";					
+				var data = this.dbLib.getDataProvider(strSQL,true);
+				if (typeof data == "object"){
+					var line = data.rs.rows[0];							
+					if (line != undefined){								
+						this.dp_d1.setText(line.tanggal);	
+						this.dp_d2.setText(line.due_date);						
+						this.e_ket.setText(line.keterangan);
+						this.e_dok.setText(line.no_dokumen);	
+						this.cb_bdh.setText(line.nik_bdh);
+						this.e_jab1.setText(line.jab_bdh);															
+						this.cb_sah.setText(line.nik_sah);
+						this.e_jab2.setText(line.jab_sah);
+						this.cb_fiat.setText(line.nik_fiat);															
+						this.e_jab3.setText(line.jab_fiat);						
+					}
+				}								
+									 
+                var strSQL = "select 'SPB' as status,b.no_pb,convert(varchar,b.tanggal,103) as tgl,b.keterangan,b.nilai,c.nama as lokasi,b.bank_trans "+
+							 "from pbh_pb_m b inner join lokasi c on b.kode_lokasi=c.kode_lokasi "+
+							 "where b.progress='3' and b.no_spb='"+this.e_nb.getText()+"' and modul not in ('IFCLOSE','PJPTG')";
+
+				var data = this.dbLib.getDataProvider(strSQL,true);
+				if (typeof data == "object" && data.rs.rows[0] != undefined){
+					var line;
+					this.sg5.clear();
+					for (var i in data.rs.rows){
+						line = data.rs.rows[i];																	
+						this.sg5.appendData([line.status.toUpperCase(),line.no_pb,line.tgl,line.keterangan,floatToNilai(line.nilai),line.lokasi,line.kode_pp]);
+					}
+				} else this.sg5.clear(1);	
+				this.doLoadRek();
+				this.pc1.setActivePage(this.pc1.childPage[0]);																			
+			}									
+		} catch(e) {alert(e);}
+	}
+
+});

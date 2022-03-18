@@ -1,0 +1,383 @@
+window.app_kopeg_pinjbrg_transaksi_fSpbk = function(owner){
+	if (owner){
+		try{		
+			window.app_kopeg_pinjbrg_transaksi_fSpbk.prototype.parent.constructor.call(this, owner);
+			this.className  = "app_kopeg_pinjbrg_transaksi_fSpbk";
+			owner.childFormConfig(this, "mainButtonClick","Form SPB Vendor: Koreksi", 0);
+			this.maximize();
+			//------------------------ login data ------------------------	
+			uses("portalui_saiCBB;portalui_datePicker;portalui_radioButton");
+			this.ePeriode = new portalui_saiLabelEdit(this,{bound:[20,10,200,20],caption:"Periode",readOnly:true, tag:2});
+			this.lTgl = new portalui_label(this,{bound:[20,11,100,18],caption:"Tanggal",underline:true});
+			this.dTgl = new portalui_datePicker(this,{bound:[120,11,100,18], selectDate:[this,"doSelectDate"]});
+			this.cbbPerLama = new portalui_saiCB(this,{bound:[720,11,200,20],caption:"Periode Bukti",mustCheck: false, tag:2});
+			this.eSPB = new portalui_saiLabelEdit(this,{bound:[20,12,290,20],caption:"No SPB",readOnly:true});
+			this.bGen = new portalui_button(this,{bound:[320,12,80,18],caption:"Generate", click:[this,"doClick"]});			
+			this.cbbNbLama = new portalui_saiCBB(this,{bound:[720,12,200,20],caption:"No SPB Lama",readOnly:true,btnClick:[this,"FindBtnClick"],btnRefreshClick:[this,"doLoadData"]});
+			this.eDok = new portalui_saiLabelEdit(this,{bound:[20,13,290,20],caption:"No Dokumen",tag:1});
+			this.eKet = new portalui_saiLabelEdit(this,{bound:[20,14,500,20],caption:"Keterangan",tag:1});
+			this.lTgl = new portalui_label(this,{bound:[20,15,100,18],caption:"Tgl Jth Tempo",underline:true});
+			this.dTgl2 = new portalui_datePicker(this,{bound:[120,15,100,18]});			
+			this.eNilai = new portalui_saiLabelEdit(this, {bound:[720,15,200,20],caption:"Nilai Total",tipeText:ttNilai,text:"0",readOnly:true});        
+			this.cbbPemohon = new portalui_saiCBBL(this,{bound:[20,16,200,20],caption:"Pemohon", btnClick:[this,"FindBtnClick"],tag:1});
+			this.ePot = new portalui_saiLabelEdit(this, {bound:[720,16,200,20],caption:"Nilai Fee",tipeText:ttNilai, text:"0", change:[this,"doChange"]});        
+			this.cbbVendor = new portalui_saiCBBL(this,{bound:[20,17,200,20],caption:"Vendor", tag:1});
+			this.eNilaiSpb = new portalui_saiLabelEdit(this, {bound:[720,17,200,20],caption:"Nilai SPB",tipeText:ttNilai, text:"0",readOnly:true});        
+			
+			this.p1 = new portalui_panel(this,{bound:[20,35,900,315],caption:"Daftar SPB Barang"});
+			this.sg1 = new portalui_saiGrid(this.p1,{bound:[1,20,898,295],colCount:12,
+			    colWidth:[[0,1,2,3,4,5,6,7,8,9,10,11],[60,100,100,0,170,0,200,80,80,80,0,0]],
+			    colTitle:["Status","No Bukti","No Kontrak","Kd Nasabah","Nama Nasabah","Kd Barang","Nama Brg","Nilai","Jumlah","Subttl","Akun HPP","No Order"],
+                colFormat:[[7,8,9],[cfNilai,cfNilai,cfNilai]],
+                buttonStyle:[[0],[bsAuto]],picklist:[[0],[new portalui_arrayMap({items:["APP","INPROG"]})]],
+                colHide:[[3,5,10,11],true],readOnly:true,defaultRow:1,change:[this,"doChangeCell"],nilaiChange:[this,"doSgChange"]});
+			this.rearrangeChild(10,22);
+			setTipeButton(tbUbahHapus);
+			
+			this.dbLib = new util_dbLib();
+			this.dbLib.addListener(this);
+			this.standarLib = new util_standar();			
+			this.setTabChildIndex();			
+			this.dataAngsuran = [];
+			this.ePeriode.setText(this.dTgl.getThnBln());
+			this.ePot.setText("0");
+			
+			var data = this.dbLib.getDataProvider("select kode_spro,flag from spro where kode_spro in ('PBRGFE','PBRGSP') and kode_lokasi = '"+this.app._lokasi+"'");
+			eval("data = "+data+";");
+			if (typeof data == "object"){
+				var line;
+				for (var i in data.rs.rows){
+					line = data.rs.rows[i];												
+					if (line.kode_spro == "PBRGSP") this.akunAP = line.flag;
+					if (line.kode_spro == "PBRGFE") this.akunFee = line.flag;
+				}
+			}
+			var prd = this.dbLib.getDataProvider("select distinct periode from spb_m where modul = 'KP.SPB' and jenis = 'PBRG' and kode_lokasi = '"+this.app._lokasi+"'",true);
+			if (typeof prd == "object"){						
+				var items = [];
+				for (var i in prd.rs.rows) items.push(prd.rs.rows[i].periode);			
+				this.cbbPerLama.setItem(new portalui_arrayMap({items:items}));
+			}
+			this.cbbPerLama.setText(this.app._periode);			
+			this.cbbPemohon.setSQL("select nik, nama  from karyawan where kode_lokasi ='"+this.app._lokasi+"'",["nik","nama"],true);
+			this.cbbVendor.setSQL("select kode_vendor, nama  from vendor where kode_lokasi ='"+this.app._lokasi+"'",["kode_vendor","nama"],true);
+		}catch(e){
+			systemAPI.alert("[app_kopeg_pinjbrg_transaksi_fSpbk]::oncreate lib : ",e);
+		}
+	}
+};
+window.app_kopeg_pinjbrg_transaksi_fSpbk.extend(window.portalui_childForm);
+window.app_kopeg_pinjbrg_transaksi_fSpbk.implement({
+	mainButtonClick : function(sender){
+		if (sender == this.app._mainForm.bClear)
+			system.confirm(this, "clear", "screen akan dibersihkan?","form inputan ini akan dibersihkan");	
+		else if (sender == this.app._mainForm.bSimpan){
+            if (this.dTgl2.getThnBln() < this.ePeriode.getText()){
+              system.alert(this,"Periode Jatuh tempo harus sama atau lebih besar dari periode input.","");  
+              return;
+            } 
+			system.confirm(this, "simpan", "Apa data sudah benar?","data diform ini apa sudah benar.");	
+		}else if (sender == this.app._mainForm.bEdit)
+			system.confirm(this, "ubah", "Apa perubahan data sudah benar?","perubahan data diform ini akan disimpan.");
+		else if (sender == this.app._mainForm.bHapus)
+			system.confirm(this, "hapus", "Yakin data akan dihapus?","data yang sudah disimpan tidak bisa di<i>retrieve</i> lagi.");	
+	},
+	simpan: function(){			
+		try{				
+			if (parseFloat(this.perLama) < parseFloat(this.app._periode)) this.eSPB.setTag(0);
+			else this.eSPB.setTag(9);		
+			if (this.standarLib.checkEmptyByTag(this, [0,1,2])){
+				try{									
+					uses("server_util_arrayList");
+					var sql = new server_util_arrayList();
+					if (parseFloat(this.perLama) < parseFloat(this.app._periode)) {
+						this.eSPB.setText(this.standarLib.noBuktiOtomatis(this.dbLib,'spb_m','no_spb',this.app._lokasi+"-SPB"+this.ePeriode.getText().substr(2,4)+".",'0000'));
+						sql.add(" update spb_m set no_link='"+this.eSPB.getText()+"',no_del = concat(no_spb,'r') where no_spb ='"+this.cbbNbLama.getText()+"' and kode_lokasi = '"+this.app._lokasi+"'");
+						sql.add(" insert into spb_m (no_spb,no_dokumen,tanggal,due_date,akun_hutang,keterangan,catatan,kode_curr,kurs,nik_buat,nik_setuju,kode_terima,kode_lokasi,kode_pp,modul,jenis,nilai,nilai_ppn,nilai_pot,posted,progress,periode,no_del,no_link,nik_user,tgl_input) "+
+							    " select concat(no_spb,'r'),no_dokumen,'"+this.dTgl.getDateString()+"',due_date,akun_hutang,keterangan,catatan,kode_curr,kurs,nik_buat,nik_setuju,kode_terima,kode_lokasi,kode_pp,modul,jenis,nilai,nilai_ppn,nilai_pot,'F','1','"+this.ePeriode.getText()+"',no_spb,'-','"+this.app._userLog+"',now() "+
+								" from spb_m where no_spb = '"+this.cbbNbLama.getText()+"' and kode_lokasi ='"+this.app._lokasi+"'");												
+						sql.add(" insert into spb_j (no_spb,no_dokumen,tanggal,no_urut,kode_akun,keterangan,dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,periode,kode_curr,kurs,nik_user,tgl_input)"+
+								" select concat(no_spb,'r'),no_dokumen,'"+this.dTgl.getDateString()+"',no_urut,kode_akun,keterangan,case dc when 'D' then 'C' else 'D' end as dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,'"+this.ePeriode.getText()+"',kode_curr,kurs,'"+this.app._userLog+"',now() "+ 
+								" from spb_j where no_spb = '"+this.cbbNbLama.getText()+"' and kode_lokasi ='"+this.app._lokasi+"' ");
+						sql.add("update kop_pbrg_m a,kop_jual_d b set a.progress='0' where a.no_jual=b.no_jual and a.kode_lokasi=b.kode_lokasi and b.no_spb='"+this.cbbNbLama.getText()+"' and b.kode_lokasi='"+this.app._lokasi+"'");
+						sql.add(" update kop_jual_d set no_spb = '-',status='1' where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");						
+						this.nb = this.eSPB.getText();
+					}
+					else{
+						sql.add("delete from spb_m where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("delete from spb_j where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("update kop_pbrg_m a,kop_jual_d b set a.progress='0' where a.no_jual=b.no_jual and a.kode_lokasi=b.kode_lokasi and b.no_spb='"+this.cbbNbLama.getText()+"' and b.kode_lokasi='"+this.app._lokasi+"'");
+						sql.add(" update kop_jual_d set no_spb = '-',status='1' where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						this.nb = this.cbbNbLama.getText();
+					}					
+					
+					sql.add("insert into spb_m (no_spb,no_dokumen,tanggal,due_date,akun_hutang,"+
+							"keterangan,catatan,kode_curr,kurs,nik_buat,nik_setuju,kode_terima,kode_lokasi,kode_pp,"+
+							"modul,jenis,nilai,nilai_ppn,nilai_pot,posted,progress,periode,no_del,no_link,nik_user,tgl_input)  values "+
+							"('"+this.nb+"','"+this.eDok.getText()+"','"+this.dTgl.getDateString()+"','"+this.dTgl2.getDateString()+
+							"','"+this.akunAP+"','"+this.eKet.getText()+"','-','IDR',1,'"+this.cbbPemohon.getText()+"','-','"+this.cbbVendor.getText()+"','"+this.app._lokasi+"','"+this.app._kodePP+
+							"','KP.SPB','PBRG',"+parseNilai(this.eNilaiSpb.getText())+",0,"+parseNilai(this.ePot.getText())+",'F','0','"+this.ePeriode.getText()+"','-','-','"+this.app._userLog+"',now())");
+					var idx = 0;
+					var d="insert into spb_j (no_spb,no_dokumen,tanggal,no_urut,kode_akun,keterangan,dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,periode,kode_curr,kurs,nik_user,tgl_input) values ";
+					this.createJurnal();
+					var line = undefined;
+					for (var i in this.gridJurnal.objList){
+						if (idx > 0) d+= ",";
+						line = this.gridJurnal.get(i);
+						d+= "('"+this.nb+"','"+this.eDok.getText()+"','"+this.dTgl.getDateString()+"',"+idx+",'"+line.get("kode_akun")+"','"+this.eKet.getText()+"','D',"+parseFloat(line.get("nilai"))+",'"+this.app._kodePP+"','-','"+this.app._lokasi+"','PBRG','"+line.get("kode_drk")+"','"+this.ePeriode.getText()+"','IDR',1,'"+this.app._userLog+"',now())";
+						idx++;
+					}
+					if (this.ePot.getText() != "0") {
+						d+=",";
+						idx++;
+						d+="('"+this.nb+"','"+this.eDok.getText()+"','"+this.dTgl.getDateString()+"',"+idx+",'"+this.akunFee+"','"+this.eKet.getText()+"','C',"+parseNilai(this.ePot.getText())+",'"+this.app._kodePP+"','-','"+this.app._lokasi+"','PBRG','FEE','"+this.ePeriode.getText()+"','IDR',1,'"+this.app._userLog+"',now())";
+					}
+					d+=",";
+					idx++;
+					d+="('"+this.nb+"','"+this.eDok.getText()+"','"+this.dTgl.getDateString()+"',"+idx+",'"+this.akunAP+"','"+this.eKet.getText()+"','C',"+parseNilai(this.eNilaiSpb.getText())+",'"+this.app._kodePP+"','-','"+this.app._lokasi+"','PBRG','AP','"+this.ePeriode.getText()+"','IDR',1,'"+this.app._userLog+"',now())";					
+					sql.add(d);					
+					
+					for (var i=0; i <= this.sg1.getRowCount(); i++){
+						if (this.sg1.cells(0,i) == "APP") {
+							sql.add("update kop_jual_d set no_spb='"+this.nb+"',status ='2' where no_jual='"+this.sg1.cells(11,i)+"' and kode_brg = '"+this.sg1.cells(5,i)+"' and kode_vendor='"+this.cbbVendor.getText()+"' and kode_lokasi = '"+this.app._lokasi+"'");
+							sql.add("update kop_pbrg_m set progress='1' where no_pbrg='"+this.sg1.cells(1,i)+"' and no_kontrak = '"+this.sg1.cells(2,i)+"' and kode_lokasi = '"+this.app._lokasi+"'");
+						}
+					}
+					this.dbLib.execArraySQL(sql);
+				}
+				catch(e){
+					system.alert(this, e,"");
+				}
+			}
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	},
+	doModalResult: function(event, modalResult){
+		if (modalResult != mrOk) return false;
+		switch (event){
+			case "clear" :
+				if (modalResult == mrOk) {
+					this.standarLib.clearByTag(this, new Array("0","1"),this.eSPB);		
+					this.sg1.clear(1);
+				}
+				break;
+			case "ubah" :	
+				if ((this.posted == "T") && (parseFloat(this.perLama) >= parseFloat(this.app._periode))) {
+					system.alert(this,"Transaksi sudah posting.","Lakukan unposting dahulu.");
+					return false;
+				}
+				if (nilaiToFloat(this.eNilaiSpb.getText()) <= 0){
+					system.alert(this,"Transaksi tidak valid.","Nilai approve tidak boleh kurang dari atau sama dengan nol.");
+					return false;
+				}
+				if (parseFloat(this.perLama) > parseFloat(this.ePeriode.getText())){
+					system.alert(this,"Periode transaksi tidak valid.","Periode transaksi tidak boleh kurang dari periode bukti lama.");
+					return false;
+				}
+				if (parseFloat(this.app._periode) > parseFloat(this.ePeriode.getText())){
+					system.alert(this,"Periode transaksi tidak valid.","Periode transaksi tidak boleh kurang dari periode aktif sistem.["+this.app._periode+"]");
+					return false;
+				}
+				if (parseFloat(this.app._periode) < parseFloat(this.ePeriode.getText())) {
+					if (this.app._pernext == "1")
+					  system.confirm(this, "simpancek", "Periode transaksi melebihi periode aktif sistem.["+this.app._periode+"]","Data akan disimpan?");
+					else{
+						system.alert(this,"Periode transaksi tidak valid.","Periode transaksi tidak boleh melebihi periode aktif sistem.["+this.app._periode+"]");
+						return false;
+					}
+				}
+				else this.simpan();
+				break;
+			case "simpancek" : this.simpan();			
+				break;
+			case "hapus" :
+				if ((this.posted == "T") && (parseFloat(this.perLama) >= parseFloat(this.app._periode))) {
+					system.alert(this,"Transaksi sudah posting.","Lakukan unposting dahulu.");
+					return false;
+				}
+				try{	
+					uses("server_util_arrayList");
+					sql = new server_util_arrayList();	
+					if (parseFloat(this.perLama) < parseFloat(this.app._periode)) {
+						sql.add(" update spb_m set no_del = concat(no_spb,'r') where no_spb ='"+this.cbbNbLama.getText()+"' and kode_lokasi = '"+this.app._lokasi+"'");
+						sql.add(" insert into spb_m (no_spb,no_dokumen,tanggal,due_date,akun_hutang,keterangan,catatan,kode_curr,kurs,nik_buat,nik_setuju,kode_terima,kode_lokasi,kode_pp,modul,jenis,nilai,nilai_ppn,nilai_pot,posted,progress,periode,no_del,no_link,nik_user,tgl_input) "+
+							    " select concat(no_spb,'r'),no_dokumen,'"+this.dTgl.getDateString()+"',due_date,akun_hutang,keterangan,catatan,kode_curr,kurs,nik_buat,nik_setuju,kode_terima,kode_lokasi,kode_pp,modul,jenis,nilai,nilai_ppn,nilai_pot,'F','1','"+this.ePeriode.getText()+"',no_spb,'-','"+this.app._userLog+"',now() "+
+								" from spb_m where no_spb = '"+this.cbbNbLama.getText()+"' and kode_lokasi ='"+this.app._lokasi+"'");												
+						sql.add(" insert into spb_j (no_spb,no_dokumen,tanggal,no_urut,kode_akun,keterangan,dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,periode,kode_curr,kurs,nik_user,tgl_input)"+
+								" select concat(no_spb,'r'),no_dokumen,'"+this.dTgl.getDateString()+"',no_urut,kode_akun,keterangan,case dc when 'D' then 'C' else 'D' end as dc,nilai,kode_pp,kode_drk,kode_lokasi,modul,jenis,'"+this.ePeriode.getText()+"',kode_curr,kurs,'"+this.app._userLog+"',now() "+ 
+								" from spb_j where no_spb = '"+this.cbbNbLama.getText()+"' and kode_lokasi ='"+this.app._lokasi+"' ");
+						sql.add("update kop_pbrg_m a,kop_jual_d b set a.progress='0' where a.no_jual=b.no_jual and a.kode_lokasi=b.kode_lokasi and b.no_spb='"+this.cbbNbLama.getText()+"' and b.kode_lokasi='"+this.app._lokasi+"'");
+						sql.add(" update kop_jual_d set no_spb = '-',status='1' where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");						
+					}
+					else{
+						sql.add("delete from spb_m where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("delete from spb_j where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+						sql.add("update kop_pbrg_m a,kop_jual_d b set a.progress='0' where a.no_jual=b.no_jual and a.kode_lokasi=b.kode_lokasi and b.no_spb='"+this.cbbNbLama.getText()+"' and b.kode_lokasi='"+this.app._lokasi+"'");
+						sql.add(" update kop_jual_d set no_spb = '-',status='1' where no_spb='"+this.cbbNbLama.getText()+"' and kode_lokasi='"+this.app._lokasi+"'");
+					}		
+					this.dbLib.execArraySQL(sql);	
+				} catch(e){
+					alert(e)
+				}
+			break;
+		}
+	},
+	doSelectDate: function(sender, y, m, d){
+       this.ePeriode.setText(sender.getThnBln());
+    },
+	doChange: function(sender){
+		if (this.ePot.getText() != "") {
+			var tot1 = nilaiToFloat(this.eNilai.getText()) - nilaiToFloat(this.ePot.getText());
+			this.eNilaiSpb.setText(floatToNilai(tot1));
+		}
+	},
+	doClick: function(sender){
+		if (sender == this.bGen){
+			this.eSPB.setText(this.standarLib.noBuktiOtomatis(this.dbLib,'spb_m','no_spb',this.app._lokasi+"-SPB"+this.ePeriode.getText().substr(2,4)+".",'0000'));
+			this.eDok.setFocus();
+		}
+	},
+	doLoadData: function(sender){
+		try{			
+			if (this.cbbNbLama.getText() != ""){
+				var data = this.dbLib.getDataProvider("select a.no_pbrg,a.no_kontrak,e.kode_agg,e.nama as nama_agg,d.kode_brg,d.nama as nama_brg,c.harga_kont as harga,c.jumlah_kont as jumlah,c.harga_kont*c.jumlah_kont as subttl,f.akun_hpp,c.no_jual,"+
+				       "g.keterangan,g.no_dokumen,g.due_date,g.nik_buat,g.kode_terima,h.nama as nama_buat,i.nama as nama_vendor,g.periode,g.tanggal as tgl,g.posted,g.nilai_pot "+
+				       "from kop_pbrg_m a "+
+					   "inner join kop_jual_m b on a.no_jual=b.no_jual and a.kode_lokasi=b.kode_lokasi "+
+					   "inner join kop_jual_d c on b.no_jual=c.no_jual and b.kode_lokasi=c.kode_lokasi and c.status='2' "+
+					   "inner join kop_brg d on c.kode_brg=d.kode_brg and c.kode_lokasi=d.kode_lokasi "+
+					   "inner join kop_agg e on a.kode_agg=e.kode_agg and a.kode_lokasi=e.kode_lokasi "+
+					   "inner join kop_brg_klp f on f.kode_klpbrg=d.kode_klpbrg and f.kode_lokasi=d.kode_lokasi "+
+					   "inner join spb_m g on c.no_spb=g.no_spb and c.kode_lokasi=g.kode_lokasi "+
+					   "inner join karyawan h on g.nik_buat=h.nik and h.kode_lokasi=g.kode_lokasi "+
+					   "inner join vendor i on g.kode_terima=i.kode_vendor and i.kode_lokasi=g.kode_lokasi "+
+					   "where g.no_spb = '"+this.cbbNbLama.getText()+"' and g.kode_lokasi = '"+this.app._lokasi+"' ");
+				eval("data = "+data+";");
+				if (typeof data == "object"){
+					var line;
+					this.sg1.clear();
+					for (var i in data.rs.rows){
+						line = data.rs.rows[i];							
+						this.sg1.appendData(["APP",line.no_pbrg,line.no_kontrak,line.kode_agg,line.nama_agg,line.kode_brg,line.nama_brg,floatToNilai(line.harga),floatToNilai(line.jumlah),floatToNilai(line.subttl),line.akun_hpp,line.no_jual]);
+					}
+					this.sg1.validasi();
+					this.dTgl.setText(line.tgl);
+					this.ePeriode.setText(line.periode);
+					
+					this.posted = line.posted;
+					this.perLama = line.periode;
+					this.ePot.setText(floatToNilai(parseFloat(line.nilai_pot)));
+					
+					this.eDok.setText(line.no_dokumen);
+					this.eKet.setText(line.keterangan);
+					this.dTgl2.setText(line.due_date);
+					this.cbbPemohon.setText(line.nik_buat,line.nama_buat);
+					this.cbbVendor.setText(line.kode_terima,line.nama_vendor);
+				}
+			}
+			else {
+				system.alert(this,"Periode tidak valid.","Data periode harus diisi.");
+			}
+		}catch(e){
+			systemAPI.alert(e);
+		}
+	}, 
+	FindBtnClick: function(sender){
+        if (sender == this.cbbNbLama) {   
+			this.standarLib.showListData(this, "Daftar Bukti SPB",sender,undefined, 
+										  "select no_spb, keterangan  from spb_m where modul = 'KP.SPB' and jenis = 'PBRG' and progress= '0' and kode_lokasi='"+this.app._lokasi+"' and periode='"+this.cbbPerLama.getText()+"' and no_del='-'", 
+										  "select count(no_spb)       from spb_m where modul = 'KP.SPB' and jenis = 'PBRG' and progress= '0' and kode_lokasi='"+this.app._lokasi+"' and periode='"+this.cbbPerLama.getText()+"' and no_del='-'",
+										  ["no_spb","keterangan"],"and",["No SPB","Deskripsi"],false);				
+			this.standarLib.clearByTag(this, new Array("1"),undefined);		
+			this.sg1.clear(1);
+		}
+		if (sender == this.cbbPemohon){
+			this.standarLib.showListData(this, "Daftar Karyawan",sender,undefined, 
+										  "select nik, nama  from karyawan where kode_lokasi ='"+this.app._lokasi+"'",
+										  "select count(nik) from karyawan where kode_lokasi ='"+this.app._lokasi+"'",
+										  ["nik","nama"],"and",["NIK","Nama"],false);
+		}
+	},
+	doChangeCell: function(sender, col, row){
+		if ((col == 0) && (this.sg1.cells(0,row) != "")){
+			this.sg1.validasi();
+		}
+	},
+	doSgChange: function(sender, col, row){
+		var tot1 =0;			
+		for (var i = 0;i < this.sg1.getRowCount();i++){
+			if ((this.sg1.cells(0,i) == "APP") && (this.sg1.cells(9,i) != "")) {
+				tot1 += nilaiToFloat(this.sg1.cells(9,i));
+			}
+		}
+		this.eNilai.setText(floatToNilai(tot1));
+		tot1 = tot1 - nilaiToFloat(this.ePot.getText());
+		this.eNilaiSpb.setText(floatToNilai(tot1));
+	},
+	createJurnal : function() {
+		var row,dtJurnal = new portalui_arrayMap();
+		var nemu = false;
+		var nreal,ix,dtJrnl = 0;
+		for (var i=0; i < this.sg1.rows.getLength(); i++){
+			if (this.sg1.getCell(0,i) == "APP") {
+				kdAkun = this.sg1.getCell(10,i);
+				kdDRK = 'HPP';
+				nreal = nilaiToFloat(this.sg1.getCell(9,i));
+				nemu = false;
+				ix = 0;
+				for (var j in dtJurnal.objList){		
+				  if (kdAkun == dtJurnal.get(j).get("kode_akun")) {
+					nemu = true;
+					row = dtJurnal.get(j);
+					ix = j;
+					break;
+				  }
+				}
+				if (!nemu){
+					row = new portalui_arrayMap();
+					row.set("kode_akun",kdAkun);
+					row.set("kode_drk",kdDRK);
+					row.set("nilai",nreal);
+					dtJrnl++;
+					dtJurnal.set(dtJrnl,row);						
+				}else {
+					dtJurnal.get(ix).set("nilai",row.get("nilai") + nreal);				
+				}
+			}
+		}
+		if (dtJurnal.getLength() > 0){
+			var desc1 = new portalui_arrayMap();
+			desc1.set("kode_akun",150);
+			desc1.set("kode_drk",150);
+			desc1.set("nilai",150);
+			var desc2 = new portalui_arrayMap();
+			desc2.set("kode_akun","S");
+			desc2.set("kode_drk","S");	
+			desc2.set("nilai","N");
+			var dataDesc = new portalui_arrayMap();
+			dataDesc.set(0,desc1);
+			dataDesc.set(1,desc2);
+			dtJurnal.setTag2(dataDesc);
+		}
+		this.gridJurnal = dtJurnal;
+	},
+	doRequestReady: function(sender, methodName, result){
+		if (sender == this.dbLib){
+			try{   
+				switch(methodName){
+	    			case "execArraySQL" :	    				
+						if (result.toLowerCase().search("error") == -1){
+							this.app._mainForm.pesan(2,"transaksi telah sukses tersimpan (No : "+ this.nb+")");							
+							this.app._mainForm.bClear.click();
+						}else system.info(this,result,"");
+	    			break;
+	      		break;
+	    		}    		
+			}
+			catch(e){
+				systemAPI.alert("step : "+step+"; error = "+e);
+			}
+	    }
+	}
+});

@@ -1,0 +1,98 @@
+if (i >0) d+=",";
+
+
+>sistem roojax
+   front end
+      profile perusahaan 
+         [menampilkan data perusahaan, historis dan executive report]
+      news
+         [menampilkan berita2 perusahaan baik utk konsumsi intern maupun ekstern]
+      karir
+         [menampilkan lowongan pekerjaan yg dpt diakses oleh orang luar]
+      toko online
+         [menyajikan informasi produk dan jasa, form pemesanan brg dan jasa secara online]
+   sim kopeg
+      simpanan
+          sp/sw/ss
+          [sistem pencatatan kartu simpanan p,w,s baik sisi tabungan maupun pengambilannya]
+      pinjaman uang
+          int/ext
+          flat/anuitas
+          [sistem pencatatan kartu pinjaman dana intern/ekstern dgn 2 sistem pencatatn bunga f/a]
+      kredit barang
+          int/ext
+          flat/anuitas
+          [sistem pencatatan kartu kredit brg dgn dana intern/ekstern dgn 2 sistem pencatatn bunga f/a]
+      perhitungan shu bagi anggota brdasrkan kontribusi
+      laporan
+          [sms broadcast , online kartu anggota (s/p/k) dan email kartu anggota]
+          kartu simpanan
+          kartu pinjaman
+	  kartu kredit barang
+          aging dan saldo pinjaman 
+   simkug
+       gl
+          multi lokasi  
+             [mengakomodasi sistem multi lokasi/beberapa lokasi entitas akuntansi]
+	  multi f/s
+             [mengakomodasi sistem multi financial statement]
+          laporan keuangan
+          	neraca 
+                labarugi
+		cashflow
+                ratio
+		audittrail 
+	     [laporan komparasi, perlokasi, konsolidasi, trail sampai ke bukti dasar]
+       anggaran
+          original
+            [mencatat histori original anggaran]
+          r/r/a
+            [menyediakan media perubahan anggaran repro/realo/abt]
+          anggaran proteksi
+            [memproteksi transaksi by anggaran 3 bulanan]
+          pelaporan komparasi anggaran & realisasi
+            [laporan pencapaian, realisasi] 
+       ar umum
+          [pencatatan akru piutang, dan pembayaran brdsrkan invoice]
+          aging dan saldo piutang
+       ap umum
+          [pencatatan akru hutang, dan pembayaran brdsrkan tagihan/spb]
+          aging dan saldo hutang
+       kasbank
+          panjar
+            [pencatatan panjar, pertanggungan pnajar linking anggaran, pengawasan panjar/karywan]
+          i/f
+            [pencatatan i/f, reimburse, closing ...linking anggaran, pengawasan i/f per karywan]
+          deposito 
+            [pencatatn deposito, pengakuan budep pencairan depo]
+          droping dana
+            [droping dana / mutasi kasbank antar lokasi entitas akuntansi] 
+   jambooair [officeAir]
+      email
+       [mail server utk masing2 karyawan sebagai media kmunikasi tdk langsung] 
+      chat
+       [room chatting utk masing2 karyawan sebagai media kmunikasi langsung]
+      video conf
+       [room teleconf utk masing2 karyawan sebagai media kmunikasi langsung]
+      presentasi online
+       [media presentasi secara online] 
+      advan filling
+       [pengelolaan meja kerja dan file secara online]
+   sim inventory
+      pembelian
+        [modul pembelian barang]
+      penjualan
+        [modul penjualan barang]
+      kasbank dan giro
+        [modul pembayaran baik sistem cash maupun giro]
+      gudang
+        [multi gudang, periodik sistem, hitung hpp, stock opname, i/o barang]
+   hrmis
+      kedinasan
+        [histori pengangkatan, jabatan, gajidasar, grading dll]
+      payroll
+        [perhitungan payroll dan pph21 berdasarkan parameter]
+      simkes    
+        [riwayat pengobatan,riwayat tes medic]
+   others
+        [cetak faktur pajak standar, kwitansi]   

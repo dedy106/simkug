@@ -1,0 +1,287 @@
+//***********************************************************************************************
+//*	Copyright (c) 2009 SAI
+//*	 All rights reserved. This program and the accompanying materials
+//*	 are made available under the terms of the Common Public License v1.0
+//*	 which accompanies this distribution, and is available at
+//*	Contributors 
+//* 			SAI, PT											
+//***********************************************************************************************
+window.app_builder_component_controls_saiEdit = function(owner, options)
+{
+    if (owner)
+    {
+    		this.stateRO 	= "";
+    		this.type 		= "";
+    		this.color      = system.getConfig("text.normalBgColor");
+    		this.fontColor  = system.getConfig("text.normalColor");
+    		this.tipeText   = window.ttNormal;
+    		this.alignment = window.alLeft;
+    		this.isFocused = false;
+		
+	        window.app_builder_component_controls_saiEdit.prototype.parent.constructor.call(this, owner, options);
+	        this.className = "portalui_saiEdit";
+	        
+	        this.setWidth(80);
+	        window.app_builder_component_controls_saiEdit.prototype.parent.setHeight.call(this, 20);
+
+	        this.wantTab = false;
+
+	        this.tabStop = true;
+	        this.password = false;
+	        this.readOnly = false;
+	        this.textLength = 0;
+	        this.onDefocus = new portalui_eventHandler();
+	        this.onKeyDown = new portalui_eventHandler();
+	        this.onKeyPress = new portalui_eventHandler();
+    		this.onExit = new portalui_eventHandler();
+    		this.onChange = new portalui_eventHandler();
+    		this.onEnter = new portalui_eventHandler();    		
+			if (options !== undefined){
+				this.updateByOptions(options);				
+				if (options.text!== undefined) this.setText(options.text);
+				if (options.tipeText !== undefined) this.setTipeText(options.tipeText);
+				if (options.password !== undefined) this.setPassword(options.password);				
+				if (options.color !== undefined) this.setColor(options.color);				
+				if (options.fontColor !== undefined) this.setFontColor(options.fontColor);				
+				if (options.alignment !== undefined) this.setAlignment(options.alignment);				
+				if (options.readOnly !== undefined) this.setReadOnly(options.readOnly);
+				if (options.keyDown !== undefined) this.onKeyDown.set(options.keyDown[0],options.keyDown[1]);
+				if (options.keyPress !== undefined) this.onKeyPress.set(options.keyPress[0],options.keyPress[1]);
+				if (options.enter !== undefined) this.onEnter.set(options.enter[0],options.enter[1]);
+				if (options.change !== undefined) this.onChange.set(options.change[0],options.change[1]);
+				if (options.exit !== undefined) this.onExit.set(options.exit[0],options.exit[1]);			
+			}
+		this.addProperty({className:this.className,password:this.password,tipeText:this.tipeText, maxLength:this.textLength, color:this.color,fontColor:this.fontColor, readOnly:this.readOnly, text:this.text});	
+		this.addEvent({defocus:"",keyDown:"",keyPress:"",enter:"",exit:"",change:""});
+    }
+};
+window.app_builder_component_controls_saiEdit.extend(window.app_builder_component_controls_control);
+window.app_builder_component_controls_saiEdit.implement({
+	doDraw: function(canvas){
+	    var n = this.getFullId();
+	    canvas.style.background = " ";
+	    canvas.style.overflow = "hidden";
+		var html = "<div id='"+n+"_border' style='{position: absolute;left: 0;top: 0;width:100%;height: 100%;}'> "+
+			"<input id='"+n+"_edit' type='"+this.type+"' value='saiEdit' "+this.stateRO+" "+
+			"style='{width:"+this.width+"px;height:100%;position:absolute;top:0; "+
+			"border:small solid #FF00FF;background:"+this.color+";color:"+this.fontColor+";border-width:1;}' "+
+			"onkeypress='return window.system.getResource("+this.resourceId+").eventKeyPress(event,\""+this+"\");' "+
+			"onkeydown='return window.system.getResource("+this.resourceId+").eventKeyDown(event,\""+this+"\");' "+
+			"onblur='window.system.getResource("+this.resourceId+").doExit(\""+this+"\")' "+
+			"onchange='window.system.getResource("+this.resourceId+").doChange(\""+this+"\")' "+
+			"onfocus='window.system.getResource("+this.resourceId+").doFocus(\""+this+"\")' "+
+			"onmouseover = 'window.system.getResource("+this.resourceId+").eventMouseOver();' "+
+			"onmousemove = 'window.system.getResource("+this.resourceId+").eventMouseMove(event);' "+
+			"onmouseout = 'window.system.getResource("+this.resourceId+").eventMouseOut();' "+
+			"/></div>";
+
+	    this.setInnerHTML(html, canvas);
+		this.input = $(n +"_edit");
+	},
+	doKeyDown: function(keyCode, buttonState){	
+	},
+	doKeyPress: function(charCode, buttonState){			
+	},
+	eventKeyPress: function(event, sender){
+		window.system.buttonState.set(event);
+	    var keyCode = document.all ? event.keyCode: event.which;
+		var charCode = document.all ? system.charCode[event.keyCode] : system.charCode[event.charCode];		
+		var input = this.input;
+		if (this.tipeText == window.ttNilai)
+		{
+			var reg = /\d/;		
+			var isFirstN = true ? charCode == '-' && input.value.indexOf('-') == -1 && start == 0: false;
+		 	var isFirstD = true ? charCode == ',' && input.value.indexOf(',') == -1 : false;
+			if (!(reg.test(charCode)) && (!isFirstN) && (!isFirstD))
+				return false;
+		}else if (this.tipeText == window.ttAngka)
+		{
+			var reg = /\d/;	
+			if (!(reg.test(charCode)))
+				return false;
+		}
+		this.onKeyPress.call(sender, charCode, window.system.buttonState); 
+		if (system.charCode[keyCode] != undefined && keyCode > 48 && this.textLength > 0 && this.textLength <= this.getText().length)
+			return false;
+		else return true;
+	},
+	eventKeyDown: function(event, sender){
+		window.system.buttonState.set(event);
+		var app = this.getApplication();
+		if ((event.keyCode == 9) || (event.keyCode == 13))
+		{
+			this.owner.nextCtrl(this);
+		}
+		this.onKeyDown.call(sender, event.keyCode, window.system.buttonState); 
+		if (system.charCode[event.keyCode] != undefined && event.keyCode > 48 && this.textLength > 0 && this.textLength <= this.getText().length)
+			return false;
+		else return true;
+	},
+	clear: function(){
+		this.setText("");
+	},
+	doExit: function(sender){
+		var input = this.input;	
+		if (input == undefined) return false;
+		if (this.tipeText == window.ttNilai)
+			this.setText(strToNilai(this.getText()));			
+		input.style.background = this.color;
+		this.onExit.call(sender);
+		this.isFocused = false;
+	},
+	doChange: function(sender){
+		this.onChange.call(sender);
+	},
+	doLostFocus: function(){
+	    if (this.activeChar != undefined)
+			this.activeChar.style.background = "";    
+	    this.isFocused = false;
+	    this.onDefocus.call(this);
+	},
+	doSetFocus: function(){
+	    var nd = this.input;
+		if (nd != undefined)
+			nd.focus();
+		this.isFocused = true;	
+	},
+	doFocus: function(){
+		this.getForm().setActiveControl(this);
+		var input = this.input;
+		if ( ( this.tipeText == window.ttNilai ) && ( input != undefined) )
+		{		
+			 input.text= nilaiToStr(this.getText());
+		}
+		input.style.background = system.getConfig("text.focus");
+		this.isFocused = true;
+	},
+	getText: function(){
+	 	var nd = this.input;
+		if (nd != undefined)
+			this.text = nd.value;
+	    return this.text;	
+	},
+	setText: function(data){
+	    this.text = data;
+		this.setProperty("text",data);		
+	    var nd = this.input;
+		if (nd != undefined)
+		{
+			if (this.tipeText == window.ttNilai)
+				nd.align = 'right';
+			nd.value = data;	
+		}
+	},
+	isWantTab: function(){
+		return this.wantTab;
+	},
+	setWantTab: function(data){
+		this.wantTab = data;
+	},
+	isPassword: function(){
+		return this.password;
+	},
+	setPassword: function(data){
+	    this.password = data;   	
+		this.setProperty("password",data);		
+		var nd = this.getContainer();
+	    if (this.password)
+			this.type = "password";		   
+	    else this.type = "text";		   
+		this.doDraw(nd);
+	},
+	isReadOnly: function(){
+		return this.readOnly;
+	},
+	setReadOnly: function(data){
+		try{
+			this.readOnly = data;    
+			this.setProperty("readOnly",data);		
+			this.input.readOnly = data;		
+			this.tabStop = !this.readOnly;		
+			var nd = this.getContainer();
+			var edt = this.input;
+			if (this.readOnly){
+				this.color = system.getConfig("text.disabled");
+				this.fontColor  = system.getConfig("text.disabledFontColor");			
+			}
+			else{
+				this.color = system.getConfig("text.normalBgColor");
+				this.fontColor  = system.getConfig("text.normalColor");			
+			}	
+			this.input.style.background = this.color;
+			this.input.style.color = this.fontColor;
+		}catch(e){
+			alert("[saiEdit]::setReadOnly:"+e);
+		}
+	},
+	setWidth: function(data){
+		window.app_builder_component_controls_saiEdit.prototype.parent.setWidth.call(this,data); 			
+		this.input.style.width = data;
+	},
+	setTipeText: function(tipe){
+		this.tipeText = tipe;
+		this.setProperty("tipeText",data);		
+		if (tipe == window.ttNilai)
+			this.setAlignment(window.alRight);
+	},
+	getTipeText: function(){
+		return this.tipeText;
+	},
+	setAlignment: function(data){
+		this.alignment = data;
+		this.setProperty("alignment",data);		
+		var editObj = this.input;
+		if(editObj != undefined)
+			editObj.style.align = this.alignment;
+	},
+	eventMouseOut: function(){
+		var input = this.input;
+		if (this.isFocused){
+			input.style.background = system.getConfig("text.focus");
+			input.style.color = system.getConfig("text.normalColor");
+		}else {
+			if (this.readOnly){
+				input.style.background = system.getConfig("text.disabled");
+				input.style.color = system.getConfig("text.disabledFontColor");
+			}
+			else{
+				input.style.background = system.getConfig("text.normalBgColor");
+				input.style.color = system.getConfig("text.normalColor");
+			}
+		}
+	},
+	eventMouseOver: function(event){
+		var input = this.input;
+		if (this.isFocused){
+			input.style.background = system.getConfig("text.focus");
+			input.style.color = system.getConfig("text.normalColor");
+		}else {
+			input.style.background = system.getConfig("text.overBgColor");
+			input.style.color = system.getConfig("text.overColor");
+		}	
+	},
+	setColor: function(data){
+		this.color = data;
+		this.setProperty("color",data);		
+		var editObj = this.input;
+			if(editObj != undefined)
+			{
+	        editObj.style.background = data;		  
+	    }
+      
+	},
+	getColor: function(){
+		return this.color;
+	},
+	blur: function(){
+		this.input.blur();
+	},
+	setLength: function(data){	
+		this.textLength = data;
+		this.setProperty("maxLength",data);		
+	},
+	maxLength: function(data){	
+		this.textLength = data;
+		this.setProperty("maxLength",data);		
+	}
+});

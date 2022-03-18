@@ -1,0 +1,88 @@
+//***********************************************************************************************
+//*	Copyright (c) 2009 SAI
+//*	 All rights reserved. This program and the accompanying materials
+//*	 are made available under the terms of the Common Public License v1.0
+//*	 which accompanies this distribution, and is available at
+//*	Contributors 
+//* 			SAI, PT											
+//***********************************************************************************************
+uses("portalui_roundPanel",true);
+window.app_frontend_alpa_fStock = function(owner,options){
+	try{
+		if (owner)
+		{
+			window.app_frontend_alpa_fStock.prototype.parent.constructor.call(this, owner,options);			
+			this.className = "app_frontend_alpa_fStock";											
+			this.initComponent();		
+			this.setCaption("Info Stock Barang");
+			this.onItemClick.set(this,"doItemsClick");
+			this.onClose.set(this,"doClose");
+			this.setView(3);
+			this.setToolbarVisible(false);
+		}
+	}catch(e)
+	{
+		alert("[app_frontend_alpa_fStock]::contruct:"+e,"");
+	}
+};
+window.app_frontend_alpa_fStock.extend(window.portalui_roundPanel);
+window.app_frontend_alpa_fStock.implement({
+	initComponent: function(){		
+		try{
+			uses("util_standar;util_file");
+			this.standarLib = new util_standar();
+			this.dbLib = new util_dbUtility();
+			this.dbLib.addListener(this);
+			this.file = new util_file();
+			this.dbLib.getDataProviderA("select a.kode_konten, c.folder,c.nama as gambar,a.deskripsi,a.tanggal, a.judul "+
+			         " ,e.folder as fldfile,e.nama as nmfile "+
+					"from portal_konten a "+
+                    "  left outer join portal_file c on a.gambar=c.no_file "+
+					"  left outer join portal_file e on a.no_file_dok=e.no_file "+
+                    " where a.kode_klp='K09' and a.kode_lokasi='"+this.app._lokasi+"' order by a.tgl_input desc ");			
+		}catch(e){
+			alert(e);
+		}
+	},	
+	doRequestReady:function(sender, methodName, result){	
+		try{
+            if (sender == this.dbLib && methodName == "getDataProvider"){   
+                eval("result = "+result);
+                if (typeof result != "string"){
+                    var img = [],desc = [],id1 = [],kd=[], more = [];	
+                    for (var i in result.rs.rows){								
+						img[img.length] = "server/"+result.rs.rows[i].folder+"/"+result.rs.rows[i].gambar;
+                        desc[desc.length] = result.rs.rows[i].judul;
+                        id1[id1.length] = result.rs.rows[i].deskripsi;
+                        kd[kd.length] =result.rs.rows[i].kode_konten;                        
+                        more[more.length]= {icon:"icon/dynpro/keranjang.png", btnCaption:"Download",filename:"server/"+result.rs.rows[i].fldfile+"/"+result.rs.rows[i].nmfile,
+                                    id:result.rs.rows[i].kode_konten,nama:result.rs.rows[i].judul};
+					}
+					this.addItems(img, desc, id1, kd, more);  
+                    this.dataProdukBaru = {img:img, title:desc, shortDesc:id1,id:kd,more:more };                                          
+                }else throw result;
+            }
+		}catch(e){
+			systemAPI.alert(this+"#Request Failed",e);
+		}
+	},
+	doItemsClick: function(sender,id,item){
+	   window.open(item.more.filename);
+	   /*
+        var html = "<div >"+item.title+"</div><br><img src='"+item.img+"'></img>";
+	    this.getClientCanvas().style.padding = "5px";   
+        this.getClientCanvas().innerHTML = html;       
+        this.setBtnCloseVisible(true);
+        */
+    },
+    doMouseCloseClick: function(event){
+        try{
+            this.show();
+            this.fade();
+            this.setBtnCloseVisible(false);
+            this.addItems(this.dataProdukBaru.img, this.dataProdukBaru.title, this.dataProdukBaru.shortDesc, this.dataProdukBaru.id, this.dataProdukBaru.more);                        
+        }catch(e){
+            alert(e);
+        }
+    }
+});
